@@ -1,0 +1,242 @@
+{
+  "project_info": {
+    "project_number": "462038358518",
+    "project_id": "fooddeliveryapp-77858",
+    "storage_bucket": "fooddeliveryapp-77858.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:2d89694454c02b84cccfd7",
+        "android_client_info": {
+          "package_name": "com.HWZ.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-fejl1go0ab8sg85f58b97crau0r5g193.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.HWZ.com",
+            "certificate_hash": "a6487d353eb5c9b03200a89a3b6770434067a7fe"
+          }
+        },
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:46a75b508a558590cccfd7",
+        "android_client_info": {
+          "package_name": "com.example.adminfood"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-c2n016rgepn70b2f933q74t7feul3pei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.adminfood",
+            "certificate_hash": "a6487d353eb5c9b03200a89a3b6770434067a7fe"
+          }
+        },
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:d20d38a8b01d3cc0cccfd7",
+        "android_client_info": {
+          "package_name": "com.example.classroom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:008e0cee58770bdbcccfd7",
+        "android_client_info": {
+          "package_name": "com.example.imaanlink_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:57c981217aea077ccccfd7",
+        "android_client_info": {
+          "package_name": "com.hunzla.fooddelivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462038358518:android:1149c61f1865dec6cccfd7",
+        "android_client_info": {
+          "package_name": "com.hunzlashafiq.deliveryboy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDE3hBhZMrxL0wyy_kJZOuFHvTATEoQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462038358518-66d0m7in80cq74nqgs2b7doji94gmmtg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "462038358518-7hb5fd2p6q7op1hd7ec07dnd9m7mpmt9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.imaanlinkAdmin"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
