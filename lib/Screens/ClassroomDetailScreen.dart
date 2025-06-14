@@ -186,14 +186,20 @@ class _TaskCard extends StatelessWidget {
                     if (isModerator)
                       PopupMenuButton(
                         icon: Icon(Icons.more_vert, color: Colors.grey[400]),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         itemBuilder: (context) => [
                           PopupMenuItem(
                             value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.edit, size: 20, color: Colors.grey[700]),
+                                Icon(Icons.edit, size: 20, color: Colors.deepPurple),
                                 const SizedBox(width: 8),
-                                Text("Edit"),
+                                Text(
+                                  "Edit",
+                                  style: GoogleFonts.poppins(),
+                                ),
                               ],
                             ),
                           ),
@@ -203,16 +209,22 @@ class _TaskCard extends StatelessWidget {
                               children: [
                                 Icon(Icons.delete, size: 20, color: Colors.red[400]),
                                 const SizedBox(width: 8),
-                                Text("Delete"),
+                                Text(
+                                  "Delete",
+                                  style: GoogleFonts.poppins(),
+                                ),
                               ],
                             ),
                           ),
                         ],
-                        onSelected: (value) {
+                        onSelected: (value) async {
                           if (value == 'edit') {
                             _navigateToEditTask(context);
                           } else if (value == 'delete') {
-                            _deleteTask();
+                            final shouldDelete = await _showDeleteConfirmation(context);
+                            if (shouldDelete ?? false) {
+                              _deleteTask();
+                            }
                           }
                         },
                       ),
@@ -293,6 +305,58 @@ class _TaskCard extends StatelessWidget {
 
   Future<void> _deleteTask() async {
     await task.reference.delete();
+  }
+
+  Future<bool?> _showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Delete Task",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.deepPurple,
+          ),
+        ),
+        content: Text(
+          "Are you sure you want to delete this task? This action cannot be undone.",
+          style: GoogleFonts.poppins(),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[700],
+            ),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.poppins(),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[400],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              "Delete",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

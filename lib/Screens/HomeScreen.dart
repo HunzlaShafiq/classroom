@@ -1,5 +1,6 @@
 import 'package:classroom/Screens/ClassroomDetailScreen.dart';
 import 'package:classroom/Screens/CreateClassroomScreen.dart';
+import 'package:classroom/Screens/LogInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,16 +17,88 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser!;
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // User can tap outside to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Confirm Logout",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              color: Colors.deepPurple,
+            ),
+          ),
+          content: Text(
+            "Are you sure you want to logout?",
+            style: GoogleFonts.poppins(),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[700],
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text(
+                "Logout",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Classrooms"),
+        title: Text(
+          "My Classrooms",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.deepPurple,
+        elevation: 4,
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            onPressed: () => FirebaseAuth.instance.signOut(),
-            icon: const Icon(Icons.logout),
+            onPressed: () => _confirmLogout(context),
+            icon: Icon(Icons.logout, color: Colors.redAccent),
+            tooltip: 'Logout',
           ),
         ],
       ),

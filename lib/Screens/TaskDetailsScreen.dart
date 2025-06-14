@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -272,18 +271,46 @@ class _ModeratorView extends StatelessWidget {
   const _ModeratorView({
     required this.taskId,
     required this.classroomId,
-    required this.onGrade, required this.totalMarks,
+    required this.onGrade,
+    required this.totalMarks,
   });
+
+  Future<void> _downloadFile(BuildContext context, String url) async {
+    try {
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        throw 'Could not launch download';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
-
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Submissions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 8),
+          child: Text(
+            "Submissions",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection("Classrooms")
@@ -294,11 +321,16 @@ class _ModeratorView extends StatelessWidget {
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator(color: Colors.white));
+              return Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
             }
 
             if (snapshot.data!.docs.isEmpty) {
               return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
@@ -321,86 +353,119 @@ class _ModeratorView extends StatelessWidget {
                       .collection("Users3")
                       .doc(submission["studentId"])
                       .get(),
-                    builder: (context, userSnapshot) {
-                      if (!userSnapshot.hasData) {
-                        return Card(child: ListTile(title: Text("Loading...")));
-                      }
-
+                  builder: (context, userSnapshot) {
+                    if (!userSnapshot.hasData) {
                       return Card(
-                        margin: EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                leading: CircleAvatar(
-                                  backgroundColor: Colors.deepPurple.shade100,
-                                  child: Text(
-                                    userSnapshot.data!["username"][0],
-                                    style: TextStyle(color: Colors.deepPurple),
-                                  ),
-                                ),
-                                title: Text(
-                                  userSnapshot.data!["username"],
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  submission["fileUrl"].split('/').last,
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                trailing: submission["isGraded"]
-                                    ? IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () => onGrade(context, submission),
-                                )
-                                    : ElevatedButton(
-                                  onPressed: () => onGrade(context, submission),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.deepPurple,
-                                  ),
-                                  child: Text("Grade"),
-                                ),
-                              ),
-                              if (submission["isGraded"]) ...[
-                                Divider(),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.grade, color: Colors.amber),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        "${submission["marksObtained"]}/$totalMarks",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green.shade700,
-                                        ),
-                                      ),
-                                      if (submission["feedback"] != null) ...[
-                                        SizedBox(width: 16),
-                                        Expanded(
-                                          child: Text(
-                                            '"${submission["feedback"]}"',
-                                            style: TextStyle(fontStyle: FontStyle.italic),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                        child: ListTile(
+                          title: Text("Loading..."),
                         ),
                       );
-                    },
+                    }
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.deepPurple.shade100,
+                                child: Text(
+                                  userSnapshot.data!["username"][0],
+                                  style: TextStyle(color: Colors.deepPurple),
+                                ),
+                              ),
+                              title: Text(
+                                userSnapshot.data!["username"],
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    submission["fileUrl"].split('/').last,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Submitted: ${DateFormat('MMM dd, hh:mm a').format(submission["submittedAt"].toDate())}",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.download, color: Colors.deepPurple),
+                                    onPressed: () => _downloadFile(context, submission["fileUrl"]),
+                                    tooltip: 'Download submission',
+                                  ),
+                                  if (submission["isGraded"])
+                                    IconButton(
+                                      icon: Icon(Icons.edit, color: Colors.blue),
+                                      onPressed: () => onGrade(context, submission),
+                                      tooltip: 'Edit grade',
+                                    )
+                                  else
+                                    ElevatedButton(
+                                      onPressed: () => onGrade(context, submission),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.deepPurple,
+                                        padding: EdgeInsets.symmetric(horizontal: 12),
+                                      ),
+                                      child: Text("Grade"),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            if (submission["isGraded"]) ...[
+                              Divider(),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.grade, color: Colors.amber),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "${submission["marksObtained"]}/$totalMarks",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: _getGradeColor(
+                                          submission["marksObtained"],
+                                          totalMarks,
+                                        ),
+                                      ),
+                                    ),
+                                    if (submission["feedback"] != null) ...[
+                                      SizedBox(width: 16),
+                                      Expanded(
+                                        child: Text(
+                                          '"${submission["feedback"]}"',
+                                          style: TextStyle(fontStyle: FontStyle.italic),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             );
@@ -408,6 +473,13 @@ class _ModeratorView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Color _getGradeColor(int marks, int totalMarks) {
+    final percentage = marks / totalMarks;
+    if (percentage >= 0.8) return Colors.green;
+    if (percentage >= 0.5) return Colors.orange;
+    return Colors.red;
   }
 }
 
