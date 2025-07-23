@@ -4,10 +4,7 @@ import 'package:classroom/Utils/Components/my_button.dart';
 import 'package:classroom/Utils/Components/my_text_field.dart';
 import 'package:classroom/Utils/Components/password_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'HomeScreen.dart';
 import 'SignUpScreen.dart';
 import 'package:provider/provider.dart';
 
