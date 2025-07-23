@@ -2,8 +2,10 @@ import 'package:classroom/Screens/LogInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'Screens/HomeScreen.dart';
 import 'firebase_options.dart';
+import 'package:classroom/Providers/auth_provider.dart';
 
 void main() async{
 
@@ -20,13 +22,19 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AuthWrapper(),
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Colors.transparent,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProviders()),
+      ],
+      child:  MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const AuthWrapper(),
+        theme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: Colors.transparent,
+        ),
       ),
     );
+
   }
 }
 
