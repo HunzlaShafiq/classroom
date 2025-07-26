@@ -95,6 +95,21 @@ class AuthProviders extends ChangeNotifier {
     }
   }
 
+  Future<void> resetPassword({required String email,context}) async {
+    _setLoading(true);
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: email.trim(),
+      );
+      Fluttertoast.showToast(msg: "Password reset link sent!");
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      Fluttertoast.showToast(msg: e.message ?? "Failed to send reset link");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
 
 
   void _setLoading(bool val) {
