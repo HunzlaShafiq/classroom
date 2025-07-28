@@ -1,10 +1,14 @@
-import 'package:classroom/Screens/ClassroomScreens/ClassroomDetailScreen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateClassroomScreen.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import '../Providers/classroom_provider.dart';
+import '../Utils/Components/classroom_card.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -16,6 +20,34 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser!;
+
+  Map<String, dynamic>? _userData;
+  bool _isUserLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection("Users3")
+          .doc(user.uid)
+          .get();
+
+      if (snapshot.exists) {
+        setState(() {
+          _userData = snapshot.data();
+          _isUserLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Failed to fetch user data: $e");
+    }
+  }
+
 
   Future<void> _confirmLogout(BuildContext context) async {
     return showDialog<void>(
@@ -82,36 +114,42 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: _buildDrawer(),
       appBar: AppBar(
-        title: Text(
-          "My Classrooms",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
+        leading: Builder(
+          builder: (context) {
+            return GestureDetector(
+              onTap: () => Scaffold.of(context).openDrawer(),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _isUserLoading
+                    ? const CircleAvatar(
+                  backgroundColor: Colors.white24,
+                  child: Icon(Icons.person, color: Colors.white),
+                )
+                    : _userData?['profileImageURL'] != null &&
+                            _userData!['profileImageURL'].toString().isNotEmpty
+                        ? CircleAvatar(
+                            backgroundImage: CachedNetworkImageProvider(
+                              _userData!['profileImageURL'],
+                            ),
+                          )
+                        : const CircleAvatar(
+                            backgroundColor: Colors.white24,
+                            child: Icon(Icons.person, color: Colors.white),
+                          ),
+              ),
+            );
+          },
         ),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        elevation: 4,
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            onPressed: () => _confirmLogout(context),
-            icon: Icon(Icons.logout, color: Colors.redAccent),
-            tooltip: 'Logout',
-          ),
-        ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("Classrooms")
-            .where("members", arrayContains: user.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+      body: Consumer<ClassroomProvider>(
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator(color:Colors.deepPurple ,));
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+
+          if (provider.classrooms.isEmpty) {
             return Center(
               child: Text(
                 "No classrooms yet!\nCreate or join one.",
@@ -120,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }
+
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -128,10 +167,13 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSpacing: 16,
               childAspectRatio: 0.9,
             ),
-            itemCount: snapshot.data!.docs.length,
+            itemCount: provider.classrooms.length,
             itemBuilder: (context, index) {
-              final classroom = snapshot.data!.docs[index];
-              return _ClassroomCard(classroom: classroom,classroomId: snapshot.data!.docs[index].id,);
+              final classroom = provider.classrooms[index];
+              return ClassroomCard(
+                classroom: classroom,
+                classroomId: classroom.id,
+              );
             },
           );
         },
@@ -143,6 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
 
   void _showClassroomOptions() {
     showModalBottomSheet(
@@ -197,14 +240,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showJoinClassroomDialog() {
-    final _codeController = TextEditingController();
+    final codeController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text("Join Classroom", style: GoogleFonts.poppins()),
           content: TextField(
-            controller: _codeController,
+            controller: codeController,
             decoration: InputDecoration(
               labelText: "Enter 6-digit Code",
               border: OutlineInputBorder(),
@@ -216,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text("Cancel"),
             ),
             ElevatedButton(
-              onPressed: () => _joinClassroom(_codeController.text.trim()),
+              onPressed: () => _joinClassroom(codeController.text.trim()),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
               child: const Text("Join", style: TextStyle(color: Colors.white)),
             ),
@@ -266,65 +309,80 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
   }
-}
 
-class _ClassroomCard extends StatelessWidget {
-  final QueryDocumentSnapshot classroom;
-  final String classroomId;
+  Widget _buildDrawer() {
+    final profileImageUrl = _userData?['profileImageURL'] ?? '';
+    final username = _userData?['username'] ?? 'User';
+    final email = _userData?['email'] ?? 'user@example.com';
 
-  const _ClassroomCard({required this.classroom, required this.classroomId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>ClassroomDetailsScreen(classroomId: classroomId)));
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Drawer(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF512DA8), Color(0xFF536DFE)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: classroom["classImageUrl"] != null
-                    ? Image.network(
-                  classroom["classImageUrl"],
-                  fit: BoxFit.cover,
-                )
-                    : Container(
-                  color: Colors.deepPurple[100],
-                  child: const Icon(Icons.class_, size: 50),
-                ),
+            Center(
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.white,
+                backgroundImage: profileImageUrl.isNotEmpty
+                    ? CachedNetworkImageProvider(profileImageUrl)
+                    : null,
+                child: profileImageUrl.isEmpty
+                    ? const Icon(Icons.person, size: 50, color: Colors.deepPurple)
+                    : null,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const SizedBox(height: 16),
+            Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    classroom["className"],
+                    username,
                     style: GoogleFonts.poppins(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      color: Colors.white,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    classroom["classDescription"] ?? "No description",
-                    style: GoogleFonts.poppins(color: Colors.grey),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    email,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 30),
+
+            const Divider(color: Colors.white38, thickness: 1),
+            Spacer(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.redAccent),
+              title: Text(
+                "Logout",
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmLogout(context);
+              },
             ),
           ],
         ),
       ),
     );
   }
+
+
 }
+

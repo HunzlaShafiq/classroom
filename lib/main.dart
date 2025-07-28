@@ -1,3 +1,4 @@
+import 'package:classroom/Providers/classroom_provider.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProviders()),
+        ChangeNotifierProvider(create: (_) => ClassroomProvider()),
       ],
       child:  MaterialApp(
         debugShowCheckedModeBanner: false,

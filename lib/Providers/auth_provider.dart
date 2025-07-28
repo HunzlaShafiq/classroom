@@ -63,6 +63,7 @@ class AuthProviders extends ChangeNotifier {
         "username": username,
         "phone": phone,
         "email": email,
+        'profileImageURL':'',
         "createdAt": Timestamp.now(),
       });
 
