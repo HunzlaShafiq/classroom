@@ -1,6 +1,6 @@
-import 'package:classroom/Screens/ClassroomDetailScreen.dart';
-import 'package:classroom/Screens/CreateClassroomScreen.dart';
-import 'package:classroom/Screens/LogInScreen.dart';
+import 'package:classroom/Screens/ClassroomScreens/ClassroomDetailScreen.dart';
+import 'package:classroom/Screens/ClassroomScreens/CreateClassroomScreen.dart';
+import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

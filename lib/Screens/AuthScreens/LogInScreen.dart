@@ -1,5 +1,5 @@
 import 'package:classroom/Providers/auth_provider.dart';
-import 'package:classroom/Screens/ForgetPasswordScreen.dart';
+import 'package:classroom/Screens/AuthScreens/ForgetPasswordScreen.dart';
 import 'package:classroom/Utils/Components/my_button.dart';
 import 'package:classroom/Utils/Components/my_text_field.dart';
 import 'package:classroom/Utils/Components/password_text_field.dart';
