@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:classroom/Providers/profile_provider.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateClassroomScreen.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
+import 'package:classroom/Screens/ProfileScreens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../Providers/classroom_provider.dart';
 import '../Utils/Components/classroom_card.dart';
+import 'ProfileScreens/change_password_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -21,32 +24,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser!;
 
-  Map<String, dynamic>? _userData;
-  bool _isUserLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserData();
-  }
 
-  Future<void> _fetchUserData() async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection("Users3")
-          .doc(user.uid)
-          .get();
 
-      if (snapshot.exists) {
-        setState(() {
-          _userData = snapshot.data();
-          _isUserLoading = false;
-        });
-      }
-    } catch (e) {
-      print("Failed to fetch user data: $e");
-    }
-  }
+
 
 
   Future<void> _confirmLogout(BuildContext context) async {
@@ -114,7 +95,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: _buildDrawer(),
+        drawer: Consumer<ProfileProvider>(
+          builder: (context,provider,child) {
+
+            if(provider.isLoading) {
+              return const Center(child: Text('Loading...'),);
+            }
+            else{return _buildDrawer(provider.userData);}
+
+          }
+        ),
       appBar: AppBar(
         leading: Builder(
           builder: (context) {
@@ -122,26 +112,45 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => Scaffold.of(context).openDrawer(),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: _isUserLoading
-                    ? const CircleAvatar(
-                  backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, color: Colors.white),
-                )
-                    : _userData?['profileImageURL'] != null &&
-                            _userData!['profileImageURL'].toString().isNotEmpty
+                child: Consumer<ProfileProvider>(builder: (context,userProfileProvider,child){
+
+                  if(userProfileProvider.isLoading){
+                    return const CircleAvatar(
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.person, color: Colors.white),
+                    );
+                  }
+
+                  else{
+                    return userProfileProvider.userData?['profileImageURL'] != null && userProfileProvider.userData!['profileImageURL'].toString().isNotEmpty
                         ? CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                              _userData!['profileImageURL'],
-                            ),
-                          )
+                      backgroundImage: CachedNetworkImageProvider(
+                        userProfileProvider.userData!['profileImageURL'],
+                      ),
+                    )
                         : const CircleAvatar(
-                            backgroundColor: Colors.white24,
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.person, color: Colors.white),
+                    );
+                  }
+
+
+
+                }),
+
               ),
             );
           },
         ),
+        title: Text(
+          "EduNest",
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Consumer<ClassroomProvider>(
         builder: (context, provider, _) {
@@ -310,10 +319,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildDrawer() {
-    final profileImageUrl = _userData?['profileImageURL'] ?? '';
-    final username = _userData?['username'] ?? 'User';
-    final email = _userData?['email'] ?? 'user@example.com';
+  Widget _buildDrawer(userData) {
+    final profileImageUrl = userData?['profileImageURL'] ?? '';
+    final username = userData?['username'] ?? 'User';
+    final email = userData?['email'] ?? 'user@example.com';
 
     return Drawer(
       child: Container(
@@ -324,9 +333,9 @@ class _HomeScreenState extends State<HomeScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+        child: Column(
           children: [
+            const SizedBox(height: 40),
             Center(
               child: CircleAvatar(
                 radius: 50,
@@ -363,19 +372,49 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 30),
+            const Divider(color: Colors.white38),
 
-            const Divider(color: Colors.white38, thickness: 1),
-            Spacer(),
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: Text(
-                "Logout",
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
+              leading: const Icon(Icons.person_outline, color: Colors.white),
+              title: Text("Profile", style: GoogleFonts.poppins(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                _confirmLogout(context);
-              },
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(userData: userData!)));
+
+              } ),
+            ListTile(
+              leading: const Icon(Icons.lock_outline, color: Colors.white),
+              title: Text("Change Password", style: GoogleFonts.poppins(color: Colors.white)),
+              onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => ChangePasswordScreen()));
+                    }),
+
+            const Spacer(),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 10),
+              child: Container(
+                margin: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade300,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.white),
+                  title: Text(
+                    "Logout",
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmLogout(context);
+                  },
+                ),
+              ),
             ),
           ],
         ),

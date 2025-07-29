@@ -1,4 +1,5 @@
 import 'package:classroom/Providers/classroom_provider.dart';
+import 'package:classroom/Providers/profile_provider.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProviders()),
         ChangeNotifierProvider(create: (_) => ClassroomProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child:  MaterialApp(
         debugShowCheckedModeBanner: false,
