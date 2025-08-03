@@ -147,74 +147,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   Widget _buildProfilePicture() {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.deepPurple,
-              width: 2,
-            ),
-          ),
-          child: _imageUrl.isNotEmpty
-              ? ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: _imageUrl,
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[200],
-                child: const Icon(Icons.person, size: 60, color: Colors.deepPurple),
-              ),
-              errorWidget: (context, url, error) => Container(
-                color: Colors.grey[200],
-                child: const Icon(Icons.error_outline, color: Colors.red),
+    return Hero(
+      tag: 'profileImage',
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.deepPurple,
+                width: 2,
               ),
             ),
-          )
-              : CircleAvatar(
-            radius: 60,
-            backgroundColor: Colors.grey[200],
-            child: const Icon(Icons.person, size: 60, color: Colors.deepPurple),
-          ),
-        ),
-        if (_isImageLoading)
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
+            child: _imageUrl.isNotEmpty
+                ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: _imageUrl,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.person, size: 60, color: Colors.deepPurple),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.error_outline, color: Colors.red),
                 ),
               ),
+            )
+                : CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.grey[200],
+              child: const Icon(Icons.person, size: 60, color: Colors.deepPurple),
             ),
           ),
-        if (_isEditing)
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: _pickImage,
+          if (_isImageLoading)
+            Positioned.fill(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
                   shape: BoxShape.circle,
-                  color: Colors.deepPurple,
                 ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 20,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+          if (_isEditing)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.deepPurple,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -365,6 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             fontSize: 16,
+            color:Colors.white
           ),
         ),
       ),

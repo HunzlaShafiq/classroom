@@ -3,6 +3,7 @@ import 'package:classroom/Providers/profile_provider.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateClassroomScreen.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:classroom/Screens/ProfileScreens/profile_screen.dart';
+import 'package:classroom/Utils/page_animations.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -337,15 +338,18 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const SizedBox(height: 40),
             Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.white,
-                backgroundImage: profileImageUrl.isNotEmpty
-                    ? CachedNetworkImageProvider(profileImageUrl)
-                    : null,
-                child: profileImageUrl.isEmpty
-                    ? const Icon(Icons.person, size: 50, color: Colors.deepPurple)
-                    : null,
+              child: Hero(
+                tag: 'profileImage',
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.white,
+                  backgroundImage: profileImageUrl.isNotEmpty
+                      ? CachedNetworkImageProvider(profileImageUrl)
+                      : null,
+                  child: profileImageUrl.isEmpty
+                      ? const Icon(Icons.person, size: 50, color: Colors.deepPurple)
+                      : null,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -379,7 +383,9 @@ class _HomeScreenState extends State<HomeScreen> {
               title: Text("Profile", style: GoogleFonts.poppins(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(userData: userData!)));
+                Navigator.push(
+                    context,
+                    CustomPageTransitions.rightToLeft(ProfileScreen(userData: userData!)));
 
               } ),
             ListTile(
@@ -389,8 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.pop(context);
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => ChangePasswordScreen()));
+                          CustomPageTransitions.bottomUp(ChangePasswordScreen()));
                     }),
 
             const Spacer(),
