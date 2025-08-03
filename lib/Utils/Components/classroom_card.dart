@@ -1,4 +1,5 @@
 import 'package:classroom/Screens/ClassroomScreens/ClassroomDetailScreen.dart';
+import 'package:classroom/Utils/page_animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +18,13 @@ class ClassroomCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>ClassroomDetailsScreen(classroomId: classroomId)));
+          Navigator.push(context,
+              CustomPageTransitions.rightToLeft(
+                  ClassroomDetailsScreen(
+                  className:classroom["className"],
+                  classroomId: classroomId)
+              )
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -29,7 +29,7 @@ class MyButton extends StatelessWidget {
             horizontal: horizontalPadding, vertical: verticalPadding),
       ),
       child: isLoading
-          ? const CircularProgressIndicator()
+          ? const CircularProgressIndicator(color: Colors.deepPurple,)
           : Text(
         text,
         style: GoogleFonts.poppins(

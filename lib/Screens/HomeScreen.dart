@@ -245,7 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreateClassroom() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const CreateClassroomScreen()),
+
+      CustomPageTransitions.fade(const CreateClassroomScreen())
     );
   }
 
@@ -382,7 +383,9 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.person_outline, color: Colors.white),
               title: Text("Profile", style: GoogleFonts.poppins(color: Colors.white)),
               onTap: () {
+
                 Navigator.pop(context);
+                Future.delayed(Duration(microseconds: 300));
                 Navigator.push(
                     context,
                     CustomPageTransitions.rightToLeft(ProfileScreen(userData: userData!)));

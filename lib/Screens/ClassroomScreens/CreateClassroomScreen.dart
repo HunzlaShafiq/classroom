@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:classroom/Providers/classroom_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:math';
+import 'package:provider/provider.dart';
+import '../../Utils/Components/my_button.dart';
 
 class CreateClassroomScreen extends StatefulWidget {
   const CreateClassroomScreen({super.key});
@@ -19,7 +17,6 @@ class _CreateClassroomScreenState extends State<CreateClassroomScreen> {
   final _classNameController = TextEditingController();
   final _classDescController = TextEditingController();
   File? _classImage;
-  bool _isLoading = false;
   String? _imageUrl;
 
   Future<void> _pickImage() async {
@@ -29,67 +26,10 @@ class _CreateClassroomScreenState extends State<CreateClassroomScreen> {
     }
   }
 
-  Future<String?> _uploadImage() async {
-    if (_classImage == null) return null;
-    try {
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child("classroom_images/${DateTime.now().millisecondsSinceEpoch}.jpg");
-      await ref.putFile(_classImage!);
-      return await ref.getDownloadURL();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to upload image: $e")),
-      );
-      return null;
-    }
-  }
 
-  Future<void> _createClassroom() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
 
-    try {
-      // 1. Upload image (if selected)
-      _imageUrl = await _uploadImage();
 
-      // 2. Generate random 6-digit join code
-      final joinCode = _generateJoinCode();
 
-      // 3. Save to Firestore
-      final user = FirebaseAuth.instance.currentUser!;
-      await FirebaseFirestore.instance.collection("Classrooms").add({
-        "className": _classNameController.text.trim(),
-        "classDescription": _classDescController.text.trim(),
-        "classImageUrl": _imageUrl,
-        "createdBy": user.uid,
-        "createdAt": Timestamp.now(),
-        "joinCode": joinCode,
-        "members": [user.uid], // Creator is first member
-      });
-
-      // 4. Update user's joined classrooms
-      await FirebaseFirestore.instance.collection("Users3").doc(user.uid).update({
-        "joinedClassrooms": FieldValue.arrayUnion([]),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Classroom created!")),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  String _generateJoinCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(6, (index) => chars[Random().nextInt(chars.length)]).join();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +37,9 @@ class _CreateClassroomScreenState extends State<CreateClassroomScreen> {
       appBar: AppBar(
         title: const Text("Create Classroom"),
         backgroundColor: Colors.deepPurple,
+        elevation: 0,
+        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios_new,color: Colors.white,)),
+
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -113,7 +56,7 @@ class _CreateClassroomScreenState extends State<CreateClassroomScreen> {
                       ? FileImage(_classImage!)
                       : (_imageUrl != null ? NetworkImage(_imageUrl!) : null),
                   child: _classImage == null && _imageUrl == null
-                      ? const Icon(Icons.camera_alt, size: 40)
+                      ? const Icon(Icons.camera_alt,color: Colors.deepPurpleAccent, size: 40)
                       : null,
                 ),
               ),
@@ -137,19 +80,25 @@ class _CreateClassroomScreenState extends State<CreateClassroomScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _createClassroom,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                  "Create Classroom",
-                  style: GoogleFonts.poppins(fontSize: 16),
-                ),
+
+              Consumer<ClassroomProvider>(
+                  builder: (context,providerValue,child) {
+                    return MyButton(
+                        text: "Create Classroom",
+                        onPressed: (){
+                          if (!_formKey.currentState!.validate()) return;
+
+                          providerValue.createClassroom(
+                              _classNameController.text,
+                              _classDescController.text,
+                              _classImage,
+                              context);
+                        },
+                        isLoading: providerValue.isLoading,
+                        horizontalPadding: 50, verticalPadding: 15);
+                  }
               ),
+
             ],
           ),
         ),
