@@ -96,6 +96,32 @@ class ClassroomProvider extends ChangeNotifier {
     return List.generate(6, (index) => chars[Random().nextInt(chars.length)]).join();
   }
 
+  Future<void> deleteAllTasksAndClassroom(classroomId) async {
+    final taskCollection = FirebaseFirestore.instance
+        .collection("Classrooms")
+        .doc(classroomId)
+        .collection("Tasks");
+
+    final tasksSnapshot = await taskCollection.get();
+
+    for (final doc in tasksSnapshot.docs) {
+      final data = doc.data();
+      final fileUrl = data['fileUrl'] as String?;
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        try {
+          final ref = FirebaseStorage.instance.refFromURL(fileUrl);
+          await ref.delete();
+        } catch (e) {
+          debugPrint("Error deleting file: $e");
+        }
+      }
+      await doc.reference.delete();
+    }
+
+    // Now delete classroom
+    await FirebaseFirestore.instance.collection("Classrooms").doc(classroomId).delete();
+  }
+
 
   void _setLoading(bool val) {
     _isLoading = val;

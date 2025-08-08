@@ -19,10 +19,11 @@ class ClassroomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           Navigator.push(context,
-              CustomPageTransitions.rightToLeft(
+              CustomPageTransitions.bottomUp(
                   ClassroomDetailsScreen(
                   className:classroom["className"],
-                  classroomId: classroomId)
+
+                  classroomId: classroomId, joinCode: classroom['joinCode'],)
               )
           );
         },
