@@ -6,6 +6,7 @@ class TaskModel {
   final String description;
   final DateTime dueDate;
   final int marks;
+  final String fileName;
   final String? fileUrl;
 
   TaskModel({
@@ -14,6 +15,7 @@ class TaskModel {
     required this.description,
     required this.dueDate,
     required this.marks,
+    required this.fileName,
     this.fileUrl,
   });
 
@@ -22,6 +24,7 @@ class TaskModel {
       id: id,
       title: data['title'] ?? '',
       description: data['description'] ?? '',
+      fileName: data['fileName'] ?? '',
       dueDate: (data['dueDate'] as Timestamp).toDate(),
       marks: data['marks'] ?? 0,
       fileUrl: data['fileUrl'],

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../Models/task_model.dart';
@@ -62,12 +63,25 @@ class TaskProvider with ChangeNotifier {
     });
   }
 
-  Future<void> deleteTask(String taskId) async {
-    await FirebaseFirestore.instance
-        .collection("Classrooms")
-        .doc(classroomId)
-        .collection("Tasks")
-        .doc(taskId)
-        .delete();
+  Future<void> deleteTask(String taskId, String? fileUrl) async {
+    try {
+      // Delete the file from Firebase Storage if a URL is provided
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        final storageRef = FirebaseStorage.instance.refFromURL(fileUrl);
+        await storageRef.delete();
+      }
+
+      // Delete the task document from Firestore
+      await FirebaseFirestore.instance
+          .collection("Classrooms")
+          .doc(classroomId)
+          .collection("Tasks")
+          .doc(taskId)
+          .delete();
+    } catch (e) {
+      debugPrint(" Error deleting task or file: $e");
+      rethrow;
+    }
   }
+
 }
