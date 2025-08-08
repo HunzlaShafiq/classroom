@@ -1,3 +1,4 @@
+import 'package:classroom/Models/task_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,12 +10,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   final String classroomId;
-  final Map<String, dynamic>? taskData;
+  final TaskModel taskData;
   final bool isEditing;
   const CreateTaskScreen({
     super.key,
     required this.classroomId,
-    this.taskData,
+    required this.taskData,
     this.isEditing = false,
   });
 
@@ -35,12 +36,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.isEditing && widget.taskData != null) {
-      _titleController.text = widget.taskData!["title"];
-      _descController.text = widget.taskData!["description"];
-      _marksController.text = widget.taskData!["marks"].toString();
-      _dueDate = widget.taskData!["dueDate"].toDate();
-      _fileUrl = widget.taskData!["fileUrl"];
+    if (widget.isEditing) {
+      _titleController.text = widget.taskData.title;
+      _descController.text = widget.taskData.description;
+      _marksController.text = widget.taskData.marks.toString();
+      _dueDate = widget.taskData.dueDate;
+      _fileUrl = widget.taskData.fileUrl;
     }
   }
 
@@ -89,6 +90,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         "description": _descController.text.trim(),
         "marks": int.parse(_marksController.text.trim()),
         "dueDate": Timestamp.fromDate(_dueDate!),
+        "fileName":_taskFile!.path.split('/').last,
         "fileUrl": fileUrl,
         "createdBy": FirebaseAuth.instance.currentUser!.uid,
         "createdAt": Timestamp.now(),
@@ -99,7 +101,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             .collection("Classrooms")
             .doc(widget.classroomId)
             .collection("Tasks")
-            .doc(widget.taskData!["taskId"])
+            .doc(widget.taskData.id)
             .update(taskData);
       } else {
         await FirebaseFirestore.instance
@@ -145,6 +147,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         elevation: 0,
+        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios_new,color: Colors.white,)),
+
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Container(
@@ -181,7 +185,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.deepPurple,
+                            color: Colors.white,
                           ),
                         ),
                         SizedBox(height: 16),
@@ -189,7 +193,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           controller: _titleController,
                           decoration: InputDecoration(
                             labelText: "Task Title",
-                            labelStyle: TextStyle(color: Colors.deepPurple),
+                            labelStyle: TextStyle(color: Colors.white),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.deepPurple),
@@ -203,7 +207,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             prefixIcon: Icon(
                               Icons.title,
-                              color: Colors.deepPurple,
+                                color: Colors.white
                             ),
                           ),
                           style: GoogleFonts.poppins(),
@@ -216,7 +220,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           maxLines: 3,
                           decoration: InputDecoration(
                             labelText: "Description",
-                            labelStyle: TextStyle(color: Colors.deepPurple),
+                            labelStyle: TextStyle(color: Colors.white),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.deepPurple),
@@ -230,7 +234,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             prefixIcon: Icon(
                               Icons.description,
-                              color: Colors.deepPurple,
+                                color: Colors.white
                             ),
                           ),
                           style: GoogleFonts.poppins(),
@@ -258,7 +262,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.deepPurple,
+                            color: Colors.white,
+
                           ),
                         ),
                         SizedBox(height: 16),
@@ -267,7 +272,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: "Total Marks",
-                            labelStyle: TextStyle(color: Colors.deepPurple),
+                            labelStyle: TextStyle(color: Colors.white),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.deepPurple),
@@ -281,7 +286,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             prefixIcon: Icon(
                               Icons.star,
-                              color: Colors.deepPurple,
+                                color: Colors.white
                             ),
                           ),
                           style: GoogleFonts.poppins(),
@@ -301,7 +306,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               children: [
                                 Icon(
                                   Icons.calendar_today,
-                                  color: Colors.deepPurple,
+                                    color: Colors.white
                                 ),
                                 SizedBox(width: 16),
                                 Text(
@@ -337,7 +342,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.deepPurple,
+                            color: Colors.white,
                           ),
                         ),
                         SizedBox(height: 16),
@@ -354,7 +359,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   style: GoogleFonts.poppins(),
                                 ),
                                 subtitle: Text(
-                                  _fileUrl!.split('/').last,
+                                  widget.taskData.fileName,
                                   style: TextStyle(color: Colors.grey),
                                 ),
                               ),
@@ -374,7 +379,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.upload_file),
+                              Icon(Icons.upload_file, color: Colors.deepPurpleAccent,),
                               SizedBox(width: 8),
                               Text(
                                 _taskFile == null
