@@ -12,7 +12,9 @@ import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const ProfileScreen({super.key, required this.userData});
+  final String profileLetter;
+
+  const ProfileScreen({super.key, required this.userData, required this.profileLetter});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -27,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   String _imageUrl = "";
+  String profileLetters='';
 
   @override
   void initState() {
@@ -36,6 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _emailController = TextEditingController(text: _userData['email']);
     _phoneController = TextEditingController(text: _userData['phone'] ?? '');
     _imageUrl = _userData['profileImageURL'] ?? '';
+    profileLetters= widget.profileLetter;
+
   }
 
   Future<void> _pickImage() async {
@@ -79,6 +84,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBar(content: Text('Failed to update profile: ${e.toString()}')),
       );
     } finally {
+
+      final username = _nameController.text.toString().trim() ?? "";
+      final nameLetter = username.split(' ').where((e) => e.isNotEmpty).toList();
+      if(nameLetter.length>1){
+        profileLetters="${nameLetter.first[0]}${nameLetter.last[0]}";
+      }
+      else{
+        profileLetters=nameLetter[0][0];
+      }
+
       setState(() => _isSaving = false);
       Map<String, dynamic>?  userData={
         'username': _nameController.text,
@@ -131,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildProfilePicture(),
+            _buildProfilePicture(profileLetters),
             const SizedBox(height: 32),
             _isEditing ? _buildEditForm() : _buildProfileInfo(),
             if (_isEditing) ...[
@@ -146,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
-  Widget _buildProfilePicture() {
+  Widget _buildProfilePicture(profileLetter) {
     return Hero(
       tag: 'profileImage',
       child: Stack(
@@ -179,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : CircleAvatar(
               radius: 60,
               backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.person, size: 60, color: Colors.deepPurple),
+              child:Text(profileLetter.toUpperCase(),style: TextStyle(color: Colors.deepPurple,fontSize: 30),),
             ),
           ),
           if (_isImageLoading)

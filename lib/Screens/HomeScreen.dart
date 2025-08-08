@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if(provider.isLoading) {
               return const Center(child: Text('Loading...'),);
             }
-            else{return _buildDrawer(provider.userData);}
+            else{return _buildDrawer(provider.userData,provider.profileLetter);}
 
           }
         ),
@@ -123,15 +123,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   else{
+
                     return userProfileProvider.userData?['profileImageURL'] != null && userProfileProvider.userData!['profileImageURL'].toString().isNotEmpty
                         ? CircleAvatar(
                       backgroundImage: CachedNetworkImageProvider(
                         userProfileProvider.userData!['profileImageURL'],
                       ),
                     )
-                        : const CircleAvatar(
-                      backgroundColor: Colors.white24,
-                      child: Icon(Icons.person, color: Colors.white),
+                        :  CircleAvatar(
+                      child: Text(userProfileProvider.profileLetter.toUpperCase()),
                     );
                   }
 
@@ -156,28 +156,33 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<ClassroomProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator(color:Colors.deepPurple ,));
+            return const Center(child: CircularProgressIndicator(color: Colors.deepPurple));
           }
 
           if (provider.classrooms.isEmpty) {
             return Center(
-              child: Text(
-                "No classrooms yet!\nCreate or join one.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 18),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.class_, size: 48, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    "No classrooms yet!\nCreate or join one.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
             );
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.9,
-            ),
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 16),
             itemCount: provider.classrooms.length,
+            separatorBuilder: (context, index) => const Divider(height: 8),
             itemBuilder: (context, index) {
               final classroom = provider.classrooms[index];
               return ClassroomCard(
@@ -321,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildDrawer(userData) {
+  Widget _buildDrawer(userData,profileLetter) {
     final profileImageUrl = userData?['profileImageURL'] ?? '';
     final username = userData?['username'] ?? 'User';
     final email = userData?['email'] ?? 'user@example.com';
@@ -348,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? CachedNetworkImageProvider(profileImageUrl)
                       : null,
                   child: profileImageUrl.isEmpty
-                      ? const Icon(Icons.person, size: 50, color: Colors.deepPurple)
+                      ? Text(profileLetter.toUpperCase(),style: TextStyle(color: Colors.deepPurple,fontSize: 30),)
                       : null,
                 ),
               ),
@@ -388,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Future.delayed(Duration(microseconds: 300));
                 Navigator.push(
                     context,
-                    CustomPageTransitions.rightToLeft(ProfileScreen(userData: userData!)));
+                    CustomPageTransitions.rightToLeft(ProfileScreen(userData: userData!,profileLetter: profileLetter)));
 
               } ),
             ListTile(
