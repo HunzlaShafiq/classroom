@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../Screens/ClassroomScreens/ClassroomDetailScreen.dart';
 import '../page_animations.dart';
 
@@ -17,15 +16,17 @@ class ClassroomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final cardColor = _getClassColor(classroom["className"], colorScheme);
+
     return Card(
-      elevation: 0,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12),
       ),
+      elevation: 1,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
           Navigator.push(
             context,
@@ -34,81 +35,118 @@ class ClassroomCard extends StatelessWidget {
                 className: classroom["className"],
                 classroomId: classroomId,
                 joinCode: classroom['joinCode'],
+                classDescription: classroom['classDescription'],
+                classImageURL: classroom['classImageUrl'],
               ),
             ),
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Classroom Avatar
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getClassColor(classroom["className"]),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  classroom["className"].substring(0, 1).toUpperCase(),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header with colored accent
+            Container(
+              height: 10,
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
                 ),
               ),
-              const SizedBox(width: 16),
-              // Classroom Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      classroom["className"],
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      // Classroom Avatar
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: cardColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            classroom["className"].substring(0, 1).toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              color: cardColor,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
+                      const SizedBox(width: 16),
+
+                      // Class Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              classroom["className"],
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Class Code: ${classroom['joinCode']}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Description
+                  if (classroom["classDescription"] != null &&
+                      classroom["classDescription"].toString().isNotEmpty)
                     Text(
-                      classroom["classDescription"] ?? "No description",
+                      classroom["classDescription"],
                       style: GoogleFonts.poppins(
-                        color: Colors.grey[600],
                         fontSize: 14,
+                        color: colorScheme.onSurface.withOpacity(0.8),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+
+                  const SizedBox(height: 30),
+
+                ],
               ),
-              // Menu Button
-              IconButton(
-                icon: Icon(Icons.more_vert, color: Colors.grey[600]),
-                onPressed: () {
-                  // Add classroom options menu
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Color _getClassColor(String className) {
+
+  Color _getClassColor(String className, ColorScheme colorScheme) {
     final colors = [
-      Colors.blue.shade700,
-      Colors.green.shade700,
-      Colors.red.shade700,
-      Colors.orange.shade700,
-      Colors.purple.shade700,
-      Colors.teal.shade700,
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary,
+      Colors.teal.shade400,
+      Colors.orange.shade400,
+      Colors.purple.shade400,
     ];
     return colors[className.hashCode % colors.length];
   }

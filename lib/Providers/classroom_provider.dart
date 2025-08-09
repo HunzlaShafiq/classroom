@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -39,15 +40,19 @@ class ClassroomProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
+
+      final String classroomID=DateTime.now().millisecondsSinceEpoch.toString();
+
       // 1. Upload image (if selected)
-      String? classImageURL = await _uploadImage(classImageFile,context);
+      String? classImageURL = await _uploadImage(classImageFile,context,classroomID);
 
       // 2. Generate random 6-digit join code
       final joinCode = _generateJoinCode();
 
       // 3. Save to Firestore
       final user = FirebaseAuth.instance.currentUser!;
-      await FirebaseFirestore.instance.collection("Classrooms").add({
+      await FirebaseFirestore.instance.collection("Classrooms").doc(classroomID).set({
+        'classroomID':classroomID,
         "className": className.trim(),
         "classDescription":classDescription.trim(),
         "classImageUrl": classImageURL,
@@ -75,12 +80,12 @@ class ClassroomProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> _uploadImage(classImage,context) async {
+  Future<String?> _uploadImage(classImage,context,classroomID) async {
     if (classImage == null) return null;
     try {
       final ref = FirebaseStorage.instance
           .ref()
-          .child("classroom_images/${DateTime.now().millisecondsSinceEpoch}.jpg");
+          .child("classroom_images/$classroomID.jpg");
       await ref.putFile(classImage!);
       return await ref.getDownloadURL();
     } catch (e) {
@@ -121,6 +126,55 @@ class ClassroomProvider extends ChangeNotifier {
     // Now delete classroom
     await FirebaseFirestore.instance.collection("Classrooms").doc(classroomId).delete();
   }
+
+  Future<void> updateClassroom({
+    required String classroomId,
+    required String className,
+    required String description,
+    File? newImageFile,
+    String? existingImageUrl,
+    required BuildContext context,
+  }) async {
+    _setLoading(true);
+
+    try {
+      String? finalImageUrl = existingImageUrl;
+
+      // If user selected a new image, upload it
+      if (newImageFile != null) {
+        final imageRef = FirebaseStorage.instance.ref().child("classroom_images/$classroomId.jpg");
+        await imageRef.putFile(newImageFile);
+        finalImageUrl = await imageRef.getDownloadURL();
+      }
+
+      // Prepare updated data
+      final Map<String, dynamic> updatedData = {
+        "className": className,
+        "classDescription": description,
+        "imageUrl": finalImageUrl ?? "",
+        "updatedAt": FieldValue.serverTimestamp(),
+      };
+
+      // Update Firestore
+      await FirebaseFirestore.instance.collection("classrooms").doc(classroomId).update(updatedData);
+
+      // Feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Classroom updated successfully")),
+      );
+
+      Navigator.pop(context);
+
+    } catch (e) {
+      debugPrint("Error updating classroom: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
 
 
   void _setLoading(bool val) {
