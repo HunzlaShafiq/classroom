@@ -9,6 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../Models/task_model.dart';
+import '../../Utils/page_animations.dart';
+import 'CreateClassroomScreen.dart';
 import 'TaskDetailsScreen.dart';
 
 
@@ -16,7 +18,10 @@ class ClassroomDetailsScreen extends StatefulWidget {
   final String className;
   final String classroomId;
   final String joinCode;
-  const ClassroomDetailsScreen({super.key, required this.classroomId, required this.className, required this.joinCode});
+  final String classDescription;
+  final String classImageURL;
+
+  const ClassroomDetailsScreen({super.key, required this.classroomId, required this.className, required this.joinCode, required this.classDescription, required this.classImageURL});
 
   @override
   State<ClassroomDetailsScreen> createState() => _ClassroomDetailsScreenState();
@@ -157,6 +162,27 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
                     }
                   },
                 ),
+              if(_isModerator)
+                ListTile(
+                  leading: Icon(Icons.edit, color: Colors.blueAccent),
+                  title: Text("Edit Classroom"),
+                  onTap: (){
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        CustomPageTransitions.fade(
+                            CreateClassroomScreen(
+                              isEditing: true,
+                              classroomId: widget.classroomId,
+                              existingName: widget.className,
+                              existingDescription: widget.classDescription,
+                              existingImageUrl: widget.classImageURL,
+
+                        ))
+                    );
+                  },
+
+                )
             ],
           ),
         );

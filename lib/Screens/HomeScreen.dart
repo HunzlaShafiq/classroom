@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final classroom = provider.classrooms[index];
               return ClassroomCard(
                 classroom: classroom,
-                classroomId: classroom.id,
+                classroomId: classroom.classroomId,
               );
             },
           );
@@ -250,7 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreateClassroom() {
     Navigator.push(
       context,
-
       CustomPageTransitions.fade(const CreateClassroomScreen())
     );
   }

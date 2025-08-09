@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:classroom/Models/classroom_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../Screens/ClassroomScreens/ClassroomDetailScreen.dart';
@@ -8,7 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 
 class ClassroomCard extends StatelessWidget {
-  final DocumentSnapshot classroom;
+  final Classroom classroom;
   final String classroomId;
 
   const ClassroomCard({
@@ -20,9 +20,8 @@ class ClassroomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final cardColor = _getClassColor(classroom["className"], colorScheme);
-    final hasImage = classroom["classImageUrl"] != null &&
-        classroom["classImageUrl"].toString().isNotEmpty;
+    final cardColor = _getClassColor(classroom.className, colorScheme);
+    final hasImage = classroom.classImageUrl.toString().isNotEmpty;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -37,11 +36,11 @@ class ClassroomCard extends StatelessWidget {
             context,
             CustomPageTransitions.rightToLeft(
               ClassroomDetailsScreen(
-                className: classroom["className"],
+                className: classroom.className,
                 classroomId: classroomId,
-                joinCode: classroom['joinCode'],
-                classDescription: classroom['classDescription'] ?? '',
-                classImageURL: classroom['classImageUrl'] ?? '',
+                joinCode: classroom.joinCode,
+                classDescription: classroom.classDescription,
+                classImageURL: classroom.classImageUrl,
               ),
             ),
           );
@@ -54,7 +53,7 @@ class ClassroomCard extends StatelessWidget {
               ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: CachedNetworkImage(
-                    imageUrl: classroom["classImageUrl"],
+                    imageUrl: classroom.classImageUrl,
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -84,7 +83,7 @@ class ClassroomCard extends StatelessWidget {
                           image: hasImage
                               ? DecorationImage(
                             image: CachedNetworkImageProvider(
-                                classroom["classImageUrl"]),
+                                classroom.classImageUrl),
                             fit: BoxFit.cover,
                           )
                               : null,
@@ -93,7 +92,7 @@ class ClassroomCard extends StatelessWidget {
                             ? null
                             : Center(
                           child: Text(
-                            classroom["className"].substring(0, 1).toUpperCase(),
+                            classroom.className.substring(0, 1).toUpperCase(),
                             style: GoogleFonts.poppins(
                               color: cardColor,
                               fontSize: 20,
@@ -110,7 +109,7 @@ class ClassroomCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              classroom["className"],
+                              classroom.className,
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
@@ -119,7 +118,7 @@ class ClassroomCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Class Code: ${classroom['joinCode']}",
+                              "Class Code: ${classroom.joinCode}",
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: colorScheme.onSurface.withOpacity(0.6),
@@ -134,10 +133,9 @@ class ClassroomCard extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   // Description
-                  if (classroom["classDescription"] != null &&
-                      classroom["classDescription"].toString().isNotEmpty)
+                  if (classroom.classDescription.toString().isNotEmpty)
                     Text(
-                      classroom["classDescription"],
+                      classroom.classDescription,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: colorScheme.onSurface.withOpacity(0.8),

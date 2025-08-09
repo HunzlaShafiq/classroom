@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
+import '../Models/classroom_model.dart';
+
 class ClassroomProvider extends ChangeNotifier {
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
@@ -14,10 +16,10 @@ class ClassroomProvider extends ChangeNotifier {
   }
 
   bool _isLoading = true;
-  List<DocumentSnapshot> _classrooms = [];
+  List<Classroom> _classrooms = [];
 
   bool get isLoading => _isLoading;
-  List<DocumentSnapshot> get classrooms => _classrooms;
+  List<Classroom> get classrooms => _classrooms;
 
   void _listenToClassrooms() {
     FirebaseFirestore.instance
@@ -25,7 +27,9 @@ class ClassroomProvider extends ChangeNotifier {
         .where("members", arrayContains: userId)
         .snapshots()
         .listen((snapshot) {
-      _classrooms = snapshot.docs;
+      _classrooms = snapshot.docs
+          .map((doc) => Classroom.fromFirestore(doc))
+          .toList();
       _isLoading = false;
       notifyListeners();
     }, onError: (error) {
@@ -33,6 +37,7 @@ class ClassroomProvider extends ChangeNotifier {
       notifyListeners();
     });
   }
+
 
   Future<void> createClassroom(className,classDescription,classImageFile,context) async {
 
