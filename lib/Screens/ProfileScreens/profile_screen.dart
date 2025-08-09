@@ -85,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } finally {
 
-      final username = _nameController.text.toString().trim() ?? "";
+      final username = _nameController.text.toString().trim();
       final nameLetter = username.split(' ').where((e) => e.isNotEmpty).toList();
       if(nameLetter.length>1){
         profileLetters="${nameLetter.first[0]}${nameLetter.last[0]}";
