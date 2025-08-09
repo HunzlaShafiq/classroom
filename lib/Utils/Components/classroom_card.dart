@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../Screens/ClassroomScreens/ClassroomDetailScreen.dart';
 import '../page_animations.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
+
 class ClassroomCard extends StatelessWidget {
   final DocumentSnapshot classroom;
   final String classroomId;
@@ -18,6 +21,8 @@ class ClassroomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final cardColor = _getClassColor(classroom["className"], colorScheme);
+    final hasImage = classroom["classImageUrl"] != null &&
+        classroom["classImageUrl"].toString().isNotEmpty;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -35,8 +40,8 @@ class ClassroomCard extends StatelessWidget {
                 className: classroom["className"],
                 classroomId: classroomId,
                 joinCode: classroom['joinCode'],
-                classDescription: classroom['classDescription'],
-                classImageURL: classroom['classImageUrl'],
+                classDescription: classroom['classDescription'] ?? '',
+                classImageURL: classroom['classImageUrl'] ?? '',
               ),
             ),
           );
@@ -44,17 +49,23 @@ class ClassroomCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header with colored accent
-            Container(
-              height: 10,
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
-            ),
+            // Header with optional image or colored accent
+            if (hasImage)
+              ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: CachedNetworkImage(
+                    imageUrl: classroom["classImageUrl"],
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: cardColor.withOpacity(0.2),
+                      height: 120,),
+                      errorWidget: (context, url, error) => _buildColorHeader(cardColor),
+                    ),
+                  )
+                  else
+                  _buildColorHeader(cardColor),
 
             Padding(
               padding: const EdgeInsets.all(16),
@@ -63,15 +74,24 @@ class ClassroomCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      // Classroom Avatar
+                      // Classroom Avatar (circular with image or initial)
                       Container(
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
                           color: cardColor.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
+                          image: hasImage
+                              ? DecorationImage(
+                            image: CachedNetworkImageProvider(
+                                classroom["classImageUrl"]),
+                            fit: BoxFit.cover,
+                          )
+                              : null,
                         ),
-                        child: Center(
+                        child: hasImage
+                            ? null
+                            : Center(
                           child: Text(
                             classroom["className"].substring(0, 1).toUpperCase(),
                             style: GoogleFonts.poppins(
@@ -108,7 +128,6 @@ class ClassroomCard extends StatelessWidget {
                           ],
                         ),
                       ),
-
                     ],
                   ),
 
@@ -127,12 +146,25 @@ class ClassroomCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 12),
 
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColorHeader(Color color) {
+    return Container(
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
         ),
       ),
     );

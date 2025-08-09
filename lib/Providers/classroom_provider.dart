@@ -134,7 +134,8 @@ class ClassroomProvider extends ChangeNotifier {
     File? newImageFile,
     String? existingImageUrl,
     required BuildContext context,
-  }) async {
+  }) async
+  {
     _setLoading(true);
 
     try {
@@ -151,12 +152,11 @@ class ClassroomProvider extends ChangeNotifier {
       final Map<String, dynamic> updatedData = {
         "className": className,
         "classDescription": description,
-        "imageUrl": finalImageUrl ?? "",
-        "updatedAt": FieldValue.serverTimestamp(),
+        "classImageUrl": finalImageUrl ?? "",
       };
 
       // Update Firestore
-      await FirebaseFirestore.instance.collection("classrooms").doc(classroomId).update(updatedData);
+      await FirebaseFirestore.instance.collection("Classrooms").doc(classroomId).update(updatedData);
 
       // Feedback
       ScaffoldMessenger.of(context).showSnackBar(
