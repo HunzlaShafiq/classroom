@@ -27,11 +27,11 @@ class ClassroomProvider extends ChangeNotifier {
         .where("members", arrayContains: userId)
         .snapshots()
         .listen((snapshot) {
-      _classrooms = snapshot.docs
-          .map((doc) => Classroom.fromFirestore(doc))
-          .toList();
+      _classrooms = snapshot.docs.map((doc) => Classroom.fromFirestore(doc)).toList();
       _isLoading = false;
       notifyListeners();
+      
+      print(_classrooms[0].classroomId);
     }, onError: (error) {
       _isLoading = false;
       notifyListeners();

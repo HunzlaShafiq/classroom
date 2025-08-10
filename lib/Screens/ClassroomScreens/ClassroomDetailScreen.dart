@@ -259,7 +259,17 @@ class TasksTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (provider.tasks.isEmpty) {
-          return const Center(child: Text("No tasks yet!"));
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('assets/no_task.png'),
+              Text("This is where you’ll assign work"),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 10),
+                child: Text("You can add assignments and other work for the class, then organize it into topics",textAlign: TextAlign.center,style: TextStyle(color: Colors.grey,),),
+              ),
+            ],
+          );
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -523,21 +533,46 @@ class MembersTab extends StatelessWidget {
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView.builder(
+
+        return ListView(
           padding: const EdgeInsets.all(16),
-          itemCount: provider.membersData.length,
-          itemBuilder: (context, index) {
-            final user = provider.membersData[index];
-            return ListTile(
-              leading: CircleAvatar(
-                child: Text(user['username'][0]),
+          children: [
+            // Teachers Section
+            if (provider.teachers.isNotEmpty) ...[
+              const Text(
+                "Teacher",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              title: Text(user['username']),
-              subtitle: Text(user['email']),
-            );
-          },
+              const SizedBox(height: 8),
+              ...provider.teachers.map((user) => ListTile(
+                leading: CircleAvatar(
+                  child: Text(user['username'][0]),
+                ),
+                title: Text(user['username']),
+                subtitle: Text(user['email']),
+              )),
+              const SizedBox(height: 20),
+            ],
+
+            // Students Section
+            if (provider.students.isNotEmpty) ...[
+              const Text(
+                "Students",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...provider.students.map((user) => ListTile(
+                leading: CircleAvatar(
+                  child: Text(user['username'][0]),
+                ),
+                title: Text(user['username']),
+                subtitle: Text(user['email']),
+              )),
+            ],
+          ],
         );
       },
     );
   }
 }
+
