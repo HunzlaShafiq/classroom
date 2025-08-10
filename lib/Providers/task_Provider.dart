@@ -13,8 +13,12 @@ class TaskProvider with ChangeNotifier {
   List<TaskModel> _tasks = [];
   List<TaskModel> get tasks => _tasks;
 
-  List<Map<String, dynamic>> _membersData = [];
-  List<Map<String, dynamic>> get membersData => _membersData;
+  List<Map<String, dynamic>> _teachers = [];
+  List<Map<String, dynamic>> _students = [];
+
+  List<Map<String, dynamic>> get teachers => _teachers;
+  List<Map<String, dynamic>> get students => _students;
+
 
 
   bool _isLoading = true;
@@ -48,20 +52,42 @@ class TaskProvider with ChangeNotifier {
     });
   }
 
-  Future<void> _fetchMembers() async{
+
+
+  Future<void> _fetchMembers() async {
     FirebaseFirestore.instance
         .collection("Classrooms")
         .doc(classroomId)
         .snapshots()
         .listen((doc) async {
-      final memberIds = (doc.data()?['members'] ?? []) as List;
-      final futures = memberIds.map((id) => FirebaseFirestore.instance.collection("Users3").doc(id).get());
+      if (!doc.exists) return;
+
+      final data = doc.data()!;
+      final memberIds = (data['members'] ?? []) as List;
+      final createdById = data['createdBy']; // Teacher's user ID
+
+      // Fetch all member user docs
+      final futures = memberIds
+          .map((id) => FirebaseFirestore.instance.collection("Users3").doc(id).get());
       final results = await Future.wait(futures);
-      _membersData = results.map((e) => e.data()!..['id'] = e.id).toList();
+
+      // Separate into teacher and students
+      _teachers = [];
+      _students = [];
+      for (var e in results) {
+        final userData = e.data()!..['id'] = e.id;
+        if (e.id == createdById) {
+          _teachers.add(userData);
+        } else {
+          _students.add(userData);
+        }
+      }
+
       _isLoading = false;
       notifyListeners();
     });
   }
+
 
   Future<void> deleteTask(String taskId, String? fileUrl) async {
     try {
