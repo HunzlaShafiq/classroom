@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../Models/task_model.dart';
 import '../../Utils/page_animations.dart';
 import 'CreateClassroomScreen.dart';
@@ -87,7 +88,7 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
           children: [
             // Tab 1: Tasks
             TasksTab(isModerator: _isModerator,classRoomID: widget.classroomId,),
-            MembersTab(),
+            MembersTab(classroomCode: widget.joinCode,),
 
 
           ],
@@ -524,7 +525,12 @@ class _TaskCard extends StatelessWidget {
 
 
 class MembersTab extends StatelessWidget {
-  const MembersTab({super.key});
+  final String classroomCode;
+
+  const MembersTab({
+    super.key,
+    required this.classroomCode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -537,6 +543,29 @@ class MembersTab extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // Always show Add Students card
+            Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 20),
+              child: ListTile(
+                leading: const Icon(Icons.person_add, color: Colors.blue),
+                title: const Text(
+                  "Add Students",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text("Share classroom code: $classroomCode"),
+                trailing: IconButton(
+                  icon: const Icon(Icons.share, color: Colors.blue),
+                  onPressed: () {
+                    Share.share(
+                      "Join our classroom using this code: $classroomCode",
+                      subject: "Classroom Invite",
+                    );
+                  },
+                ),
+              ),
+            ),
+
             // Teachers Section
             if (provider.teachers.isNotEmpty) ...[
               const Text(
@@ -545,34 +574,58 @@ class MembersTab extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               ...provider.teachers.map((user) => ListTile(
-                leading: CircleAvatar(
-                  child: Text(user['username'][0]),
-                ),
-                title: Text(user['username']),
-                subtitle: Text(user['email']),
+                leading: _buildAvatar(user),
+                title: Text(user['username'] ?? "Unnamed"),
+                subtitle: Text(user['email'] ?? ""),
               )),
               const SizedBox(height: 20),
             ],
 
             // Students Section
-            if (provider.students.isNotEmpty) ...[
-              const Text(
-                "Students",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              ...provider.students.map((user) => ListTile(
-                leading: CircleAvatar(
-                  child: Text(user['username'][0]),
+            const Text(
+              "Students",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (provider.students.isEmpty)
+               Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  children: [
+                    Text(
+                      "No students yet",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ],
                 ),
-                title: Text(user['username']),
-                subtitle: Text(user['email']),
+              )
+            else
+              ...provider.students.map((user) => ListTile(
+                leading: _buildAvatar(user),
+                title: Text(user['username'] ?? "Unnamed"),
+                subtitle: Text(user['email'] ?? ""),
               )),
-            ],
           ],
         );
       },
     );
   }
+
+  Widget _buildAvatar(Map<String, dynamic> user) {
+    final profileImage = user['profileImageURL'];
+    if (profileImage != null && profileImage.isNotEmpty) {
+      return CircleAvatar(backgroundImage: NetworkImage(profileImage));
+    }
+    return CircleAvatar(
+      backgroundColor: Colors.blueAccent,
+      child: Text(
+        (user['username']?.isNotEmpty ?? false)
+            ? user['username'][0].toUpperCase()
+            : '?',
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
 }
+
 
