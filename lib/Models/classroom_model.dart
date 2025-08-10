@@ -25,7 +25,7 @@ class Classroom {
   factory Classroom.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Classroom(
-      classroomId: data['classroomID'] ?? '',
+      classroomId: data['classroomId'] ?? '',
       className: data['className'] ?? '',
       classDescription: data['classDescription'] ?? '',
       classImageUrl: data['classImageUrl'] ?? '',
@@ -39,7 +39,7 @@ class Classroom {
   // To Firestore Map
   Map<String, dynamic> toMap() {
     return {
-      'classroomID': classroomId,
+      'classroomId': classroomId,
       'className': className,
       'classDescription': classDescription,
       'classImageUrl': classImageUrl,
