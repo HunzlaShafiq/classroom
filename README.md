@@ -45,3 +45,34 @@
 1. **Clone the repository**
    ```bash
    git clone https://github.com/HunzlaShafiq/classroom.git
+
+   Setup Firebase
+
+bash
+flutter pub add firebase_core
+flutterfire configure
+Run the app
+
+bash
+flutter pub get
+flutter run
+📦 Tech Stack
+Frontend:
+
+Flutter (Null Safety)
+
+Provider (State Management)
+
+Intl (Localization)
+
+PDF Viewer/Generator
+
+Backend:
+
+Firebase Authentication
+
+Cloud Firestore (NoSQL Database)
+
+Firebase Storage (File Uploads)
+
+Firebase Cloud Messaging (Notifications)
