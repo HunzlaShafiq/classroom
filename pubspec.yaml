@@ -49,6 +49,9 @@ dependencies:
   provider: ^6.1.5
   cached_network_image: ^3.4.1
   share_plus: ^11.0.0
+  path_provider: ^2.1.5
+  http: ^1.5.0
+
 
 
 dev_dependencies:
