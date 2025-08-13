@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:classroom/Providers/classroom_provider.dart';
 import 'package:classroom/Providers/task_Provider.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateTaskScreen.dart';
+import 'package:classroom/Utils/Components/class_share_card.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,7 +91,10 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
           children: [
             // Tab 1: Tasks
             TasksTab(isModerator: _isModerator,classRoomID: widget.classroomId,),
-            MembersTab(classroomCode: widget.joinCode,className: widget.className,profileImageUrl: widget.classImageURL,),
+            MembersTab(classroomCode: widget.joinCode,
+              className: widget.className,profileImageUrl: widget.classImageURL,
+              classDescription: widget.classDescription,
+            ),
 
 
           ],
@@ -557,10 +561,11 @@ class MembersTab extends StatelessWidget {
   final String classroomCode;
   final String className;
   final String profileImageUrl;
+  final String classDescription;
 
   const MembersTab({
     super.key,
-    required this.classroomCode, required this.className, required this.profileImageUrl,
+    required this.classroomCode, required this.className, required this.profileImageUrl, required this.classDescription,
   });
 
   @override
@@ -575,6 +580,9 @@ class MembersTab extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             // Always show Add Students card
+
+            ClassroomShareWidget(className: className,profileImageUrl: profileImageUrl, classCode: classroomCode, classDescription: classDescription),
+
             Card(
               elevation: 2,
               margin: const EdgeInsets.only(bottom: 20),
@@ -650,9 +658,11 @@ class MembersTab extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: Column(
                   children: [
+                    SizedBox(height: 50,),
+                    Image.asset('assets/empty_student.png'),
                     Text(
                       "No students yet",
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                   ],
                 ),
