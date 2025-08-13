@@ -1,16 +1,78 @@
-# classroom
+# 🎓 EduNest - Classroom Management App
 
-A new Flutter project.
+<div align="center">
+  <img src="https://github.com/HunzlaShafiq/classroom/blob/main/assets/logo.png?raw=true" width="200" alt="EduNest Logo">
+  <p>A Flutter-based classroom management system inspired by Google Classroom</p>
+  
+  [![Flutter](https://img.shields.io/badge/Flutter-%2302569B?logo=flutter)](https://flutter.dev)
+  [![Firebase](https://img.shields.io/badge/Firebase-%23FFCA28?logo=firebase)](https://firebase.google.com)
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+</div>
 
-## Getting Started
+## 📱 App Preview
 
-This project is a starting point for a Flutter application.
+<div align="center">
+  <img src="https://github.com/HunzlaShafiq/classroom/blob/main/screenshots/demo.gif?raw=true" width="300" alt="App Demo">
+</div>
 
-A few resources to get you started if this is your first Flutter project:
+## ✨ Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **👨‍🏫 Teacher Dashboard**
+  - Create and manage classes
+  - Post assignments with deadlines
+  - Grade student submissions
+  - Announcements broadcast
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **👨‍🎓 Student Portal**
+  - Join classes via code
+  - Submit assignments
+  - View grades and feedback
+  - Class discussion forum
+
+- **🔐 Secure Authentication**
+  - Email/password login
+  - Google Sign-In integration
+  - Role-based access control
+
+- **📦 Tech Stack**
+  - Flutter (Frontend)
+  - Firebase (Backend)
+  - Provider (State Management)
+  - Clean Architecture
+
+## 🛠️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/HunzlaShafiq/classroom.git
+
+   Setup Firebase
+
+bash
+flutter pub add firebase_core
+flutterfire configure
+Run the app
+
+bash
+flutter pub get
+flutter run
+📦 Tech Stack
+Frontend:
+
+Flutter (Null Safety)
+
+Provider (State Management)
+
+Intl (Localization)
+
+PDF Viewer/Generator
+
+Backend:
+
+Firebase Authentication
+
+Cloud Firestore (NoSQL Database)
+
+Firebase Storage (File Uploads)
+
+Firebase Cloud Messaging (Notifications)
