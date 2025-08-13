@@ -1,18 +1,20 @@
+import 'dart:io';
 import 'package:classroom/Providers/classroom_provider.dart';
 import 'package:classroom/Providers/task_Provider.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateTaskScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../Models/task_model.dart';
 import '../../Utils/page_animations.dart';
 import 'CreateClassroomScreen.dart';
 import 'TaskDetailsScreen.dart';
+import 'package:http/http.dart' as http;
 
 
 class ClassroomDetailsScreen extends StatefulWidget {
@@ -88,7 +90,7 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
           children: [
             // Tab 1: Tasks
             TasksTab(isModerator: _isModerator,classRoomID: widget.classroomId,),
-            MembersTab(classroomCode: widget.joinCode,),
+            MembersTab(classroomCode: widget.joinCode,className: widget.className,profileImageUrl: widget.classImageURL,),
 
 
           ],
@@ -130,14 +132,41 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
               ListTile(
                 leading: Icon(Icons.share, color: Colors.deepPurple),
                 title: Text("Share Class Code"),
-                onTap: () {
+                onTap: () async {
+
                   Navigator.pop(context);
+
                   final message = "👋 Hey! Join classroom *${widget.className}* using code: *${widget.joinCode}* on our EduNest app.";
-                  Clipboard.setData(ClipboardData(text: message));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Join code copied to clipboard!")),
+                  final subject = "Classroom Invite";
+
+                  if (widget.classImageURL.isNotEmpty) {
+                    try {
+                      // 1️⃣ Download the image from URL
+                      final response = await http.get(Uri.parse(widget.classImageURL));
+                      if (response.statusCode == 200) {
+                        final tempDir = await getTemporaryDirectory();
+                        final file = File('${tempDir.path}/classroom.jpg');
+                        await file.writeAsBytes(response.bodyBytes);
+
+                        // 2️⃣ Share with image
+                        await Share.shareXFiles(
+                          [XFile(file.path)],
+                          text: message,
+                          subject: subject,
+                        );
+                        return;
+                      }
+                    } catch (e) {
+                      debugPrint("Image download failed: $e");
+                    }
+                  }
+
+                  // 3️⃣ Fallback: Share text only
+                  await Share.share(
+                    message,
+                    subject: subject,
                   );
-                },
+                }
               ),
               if (_isModerator)
                 ListTile(
@@ -526,10 +555,12 @@ class _TaskCard extends StatelessWidget {
 
 class MembersTab extends StatelessWidget {
   final String classroomCode;
+  final String className;
+  final String profileImageUrl;
 
   const MembersTab({
     super.key,
-    required this.classroomCode,
+    required this.classroomCode, required this.className, required this.profileImageUrl,
   });
 
   @override
@@ -556,13 +587,40 @@ class MembersTab extends StatelessWidget {
                 subtitle: Text("Share classroom code: $classroomCode"),
                 trailing: IconButton(
                   icon: const Icon(Icons.share, color: Colors.blue),
-                  onPressed: () {
-                    Share.share(
-                      "Join our classroom using this code: $classroomCode",
-                      subject: "Classroom Invite",
+                  onPressed: () async {
+                    final message = "👋 Hey! Join classroom *$className* using code: *$classroomCode* on our EduNest app.";
+                    final subject = "Classroom Invite";
+
+                    if (profileImageUrl.isNotEmpty) {
+                      try {
+                        // 1️⃣ Download the image from URL
+                        final response = await http.get(Uri.parse(profileImageUrl));
+                        if (response.statusCode == 200) {
+                          final tempDir = await getTemporaryDirectory();
+                          final file = File('${tempDir.path}/classroom.jpg');
+                          await file.writeAsBytes(response.bodyBytes);
+
+                          // 2️⃣ Share with image
+                          await Share.shareXFiles(
+                            [XFile(file.path)],
+                            text: message,
+                            subject: subject,
+                          );
+                          return;
+                        }
+                      } catch (e) {
+                        debugPrint("Image download failed: $e");
+                      }
+                    }
+
+                    // 3️⃣ Fallback: Share text only
+                    await Share.share(
+                      message,
+                      subject: subject,
                     );
                   },
-                ),
+                )
+
               ),
             ),
 
