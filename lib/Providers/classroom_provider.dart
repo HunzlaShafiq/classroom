@@ -186,4 +186,14 @@ class ClassroomProvider extends ChangeNotifier {
     _isLoading = val;
     notifyListeners();
   }
+
+
+  void removeDataOnLogout(){
+    _classrooms.clear();
+    notifyListeners();
+  }
+
+  void refreshDataOnLogin(){
+    _listenToClassrooms();
+  }
 }

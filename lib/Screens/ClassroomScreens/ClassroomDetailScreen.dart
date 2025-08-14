@@ -214,7 +214,6 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
                     final provider = Provider.of<ClassroomProvider>(context, listen: false);
 
                     final confirmed = await _confirmDelete(context);
-                    debugPrint(confirmed.toString());
                     if (confirmed == true) {
 
                       await provider.deleteAllTasksAndClassroom(widget.classroomId);
@@ -248,7 +247,43 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
                     );
                   },
 
-                )
+                ),
+              if(!_isModerator)
+                ListTile(
+                    leading: Icon(Icons.logout, color: Colors.redAccent),
+                    title: Text("Leave Classroom"),
+                    onTap: () async {
+                      Navigator.pop(context);
+
+                      final confirmed = await _confirmDelete(context,isDelete: false);
+                      if (confirmed == true) {
+
+                        await FirebaseFirestore.instance
+                            .collection("Classrooms")
+                            .doc(widget.classroomId)
+                            .update({
+                          "members": FieldValue.arrayRemove([user.uid]),
+                        });
+
+
+
+
+                         Navigator.pop(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Successfully removed your class")),
+                        );
+                      }
+
+
+                      try {
+                      } catch (e) {
+                        Navigator.pop(context);
+                        debugPrint("Leaving failed: $e");
+                      }
+                    }
+                ),
+
             ],
           ),
         );
@@ -257,20 +292,20 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
   }
 
 
-  Future<bool?> _confirmDelete(BuildContext context) async {
+  Future<bool?> _confirmDelete(BuildContext context, {isDelete = true}) async {
     return await showDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (context) => AlertDialog(
         title: Text(
-          "Delete Classroom",
+          isDelete?"Delete Classroom":"Leave Classroom",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.deepPurple,
           ),
         ),
         content: Text(
-          "Are you sure you want to delete this classroom and all tasks?",
+          isDelete?"Are you sure you want to delete this classroom and all tasks?":"Are you sure you want to Leave this classroom",
           style: GoogleFonts.poppins(),
         ),
         shape: RoundedRectangleBorder(
@@ -297,7 +332,7 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: Text(
-              "Delete",
+              isDelete ?"Delete" : "Leave",
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,

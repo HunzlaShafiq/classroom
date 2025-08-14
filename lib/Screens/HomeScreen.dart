@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:classroom/Models/classroom_model.dart';
 import 'package:classroom/Providers/profile_provider.dart';
+import 'package:classroom/Screens/ClassroomScreens/ClassroomDetailScreen.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateClassroomScreen.dart';
 import 'package:classroom/Screens/AuthScreens/LogInScreen.dart';
 import 'package:classroom/Screens/ProfileScreens/profile_screen.dart';
@@ -11,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/classroom_provider.dart';
+import '../Services/logout_login_services.dart';
 import '../Utils/Components/classroom_card.dart';
 import 'ProfileScreens/change_password_screen.dart';
 
@@ -164,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.class_, size: 48, color: Colors.grey[400]),
+                  Image.asset('assets/empty_classroom.png'),
                   const SizedBox(height: 16),
                   Text(
                     "No classrooms yet!\nCreate or join one.",
@@ -318,6 +321,26 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Joined successfully!")),
       );
+
+      final classData= await FirebaseFirestore.instance
+          .collection("Classrooms")
+          .doc(classroom.id).get();
+      Classroom classroomDetails=  Classroom.fromFirestore(classData.data() as DocumentSnapshot<Object?>);
+
+
+    Navigator.push(
+        context,
+        CustomPageTransitions.rightToLeft(
+          ClassroomDetailsScreen(
+            className:  classroomDetails.className,
+            classroomId: classroomDetails.classroomId,
+            joinCode: classroomDetails.joinCode,
+            classDescription: classroomDetails.classDescription,
+            classImageURL: classroomDetails.classImageUrl,
+          ),
+        ),
+      );
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: ${e.toString()}")),
@@ -424,6 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     _confirmLogout(context);
+                    LogoutLoginServices().logoutRemoveData(context);
                   },
                 ),
               ),
