@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:classroom/Providers/classroom_provider.dart';
 import 'package:classroom/Providers/task_Provider.dart';
 import 'package:classroom/Screens/ClassroomScreens/CreateTaskScreen.dart';
-import 'package:classroom/Utils/Components/class_share_card.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -140,36 +139,69 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
 
                   Navigator.pop(context);
 
-                  final message = "👋 Hey! Join classroom *${widget.className}* using code: *${widget.joinCode}* on our EduNest app.";
+                  final message =
+                      "👋 Hey! Join classroom *${widget.className}* using code: *${widget.joinCode}* on our EduNest app.";
                   final subject = "Classroom Invite";
 
-                  if (widget.classImageURL.isNotEmpty) {
-                    try {
-                      // 1️⃣ Download the image from URL
-                      final response = await http.get(Uri.parse(widget.classImageURL));
-                      if (response.statusCode == 200) {
-                        final tempDir = await getTemporaryDirectory();
-                        final file = File('${tempDir.path}/classroom.jpg');
-                        await file.writeAsBytes(response.bodyBytes);
-
-                        // 2️⃣ Share with image
-                        await Share.shareXFiles(
-                          [XFile(file.path)],
-                          text: message,
-                          subject: subject,
-                        );
-                        return;
-                      }
-                    } catch (e) {
-                      debugPrint("Image download failed: $e");
-                    }
-                  }
-
-                  // 3️⃣ Fallback: Share text only
-                  await Share.share(
-                    message,
-                    subject: subject,
+                  // Show loading dialog
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) {
+                      return Dialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(color: Colors.blue),
+                              const SizedBox(height: 16),
+                              Text(
+                                "Preparing your invite...",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   );
+
+                  try {
+                    if (widget.classImageURL.isNotEmpty) {
+                      try {
+                        final response = await http.get(Uri.parse(widget.classImageURL));
+                        if (response.statusCode == 200) {
+                          final tempDir = await getTemporaryDirectory();
+                          final file = File('${tempDir.path}/classroom.jpg');
+                          await file.writeAsBytes(response.bodyBytes);
+
+                          Navigator.pop(context); // Close loading dialog
+
+                          await Share.shareXFiles(
+                            [XFile(file.path)],
+                            text: message,
+                            subject: subject,
+                          );
+                          return;
+                        }
+                      } catch (e) {
+                        debugPrint("Image download failed: $e");
+                      }
+                    }
+
+                    Navigator.pop(context); // Close loading dialog
+
+                    // Fallback: Share text only
+                    await Share.share(
+                      message,
+                      subject: subject,
+                    );
+                  } catch (e) {
+                    Navigator.pop(context); // Ensure dialog is closed on error
+                    debugPrint("Sharing failed: $e");
+                  }
                 }
               ),
               if (_isModerator)
@@ -581,8 +613,6 @@ class MembersTab extends StatelessWidget {
           children: [
             // Always show Add Students card
 
-            ClassroomShareWidget(className: className,profileImageUrl: profileImageUrl, classCode: classroomCode, classDescription: classDescription),
-
             Card(
               elevation: 2,
               margin: const EdgeInsets.only(bottom: 20),
@@ -593,41 +623,75 @@ class MembersTab extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text("Share classroom code: $classroomCode"),
-                trailing: IconButton(
-                  icon: const Icon(Icons.share, color: Colors.blue),
-                  onPressed: () async {
-                    final message = "👋 Hey! Join classroom *$className* using code: *$classroomCode* on our EduNest app.";
-                    final subject = "Classroom Invite";
+                  trailing: IconButton(
+                    icon: const Icon(Icons.share, color: Colors.blue),
+                    onPressed: () async {
+                      final message =
+                          "👋 Hey! Join classroom *$className* using code: *$classroomCode* on our EduNest app.";
+                      final subject = "Classroom Invite";
 
-                    if (profileImageUrl.isNotEmpty) {
-                      try {
-                        // 1️⃣ Download the image from URL
-                        final response = await http.get(Uri.parse(profileImageUrl));
-                        if (response.statusCode == 200) {
-                          final tempDir = await getTemporaryDirectory();
-                          final file = File('${tempDir.path}/classroom.jpg');
-                          await file.writeAsBytes(response.bodyBytes);
-
-                          // 2️⃣ Share with image
-                          await Share.shareXFiles(
-                            [XFile(file.path)],
-                            text: message,
-                            subject: subject,
+                      // Show loading dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(color: Colors.blue),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "Preparing your invite...",
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
-                          return;
-                        }
-                      } catch (e) {
-                        debugPrint("Image download failed: $e");
-                      }
-                    }
+                        },
+                      );
 
-                    // 3️⃣ Fallback: Share text only
-                    await Share.share(
-                      message,
-                      subject: subject,
-                    );
-                  },
-                )
+                      try {
+                        if (profileImageUrl.isNotEmpty) {
+                          try {
+                            final response = await http.get(Uri.parse(profileImageUrl));
+                            if (response.statusCode == 200) {
+                              final tempDir = await getTemporaryDirectory();
+                              final file = File('${tempDir.path}/classroom.jpg');
+                              await file.writeAsBytes(response.bodyBytes);
+
+                              Navigator.pop(context); // Close loading dialog
+
+                              await Share.shareXFiles(
+                                [XFile(file.path)],
+                                text: message,
+                                subject: subject,
+                              );
+                              return;
+                            }
+                          } catch (e) {
+                            debugPrint("Image download failed: $e");
+                          }
+                        }
+
+                        Navigator.pop(context); // Close loading dialog
+
+                        // Fallback: Share text only
+                        await Share.share(
+                          message,
+                          subject: subject,
+                        );
+                      } catch (e) {
+                        Navigator.pop(context); // Ensure dialog is closed on error
+                        debugPrint("Sharing failed: $e");
+                      }
+                    },
+                  )
+
 
               ),
             ),
@@ -641,7 +705,7 @@ class MembersTab extends StatelessWidget {
               const SizedBox(height: 8),
               ...provider.teachers.map((user) => ListTile(
                 leading: _buildAvatar(user),
-                title: Text(user['username'] ?? "Unnamed"),
+                title: Text(user['username'] ?? "UnKnown"),
                 subtitle: Text(user['email'] ?? ""),
               )),
               const SizedBox(height: 20),
