@@ -5,6 +5,7 @@ import 'package:classroom/Utils/Components/my_text_field.dart';
 import 'package:classroom/Utils/Components/password_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../Services/logout_login_services.dart';
 import 'SignUpScreen.dart';
 import 'package:provider/provider.dart';
 
@@ -85,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: "Login",
                         onPressed: (){
                           providerValue.login(_emailController.text, _passwordController.text, context);
+                          LogoutLoginServices().loginRefreshData(context);
                         },
                         isLoading: providerValue.isLoading,
                         horizontalPadding: 50, verticalPadding: 15);
