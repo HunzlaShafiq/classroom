@@ -111,9 +111,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Task Details", style: GoogleFonts.poppins()),
-        backgroundColor: Colors.deepPurple,
+        title: Text(
+          "Task Details",
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
         elevation: 0,
+        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios_new,color: Colors.white,)),
+
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -333,10 +342,15 @@ class _ModeratorView extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text(
-                    "No submissions yet",
-                    style: GoogleFonts.poppins(),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Image.asset("assets/no_submit.png"),
+                      Text(
+                        "No submissions yet",
+                        style: GoogleFonts.poppins(),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
               );

@@ -372,16 +372,17 @@ class _TaskCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TaskDetailsScreen(
-              taskId: task.id,
-              classroomId: classRoomID,
-              isModerator: isModerator,
-            ),
-          ),
-        ),
+        onTap: () {
+          Navigator.push(
+              context,
+              CustomPageTransitions.fade(
+                  TaskDetailsScreen(
+                taskId: task.id,
+                classroomId: classRoomID,
+                isModerator: isModerator,
+              ))
+          );
+        } ,
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
