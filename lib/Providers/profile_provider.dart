@@ -59,4 +59,14 @@ class ProfileProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  void removeDataOnLogout(){
+    _userData?.clear();
+    _ProfileLetter='';
+    notifyListeners();
+  }
+
+  void refreshDataOnLogin(){
+    fetchUserData();
+  }
+
 }

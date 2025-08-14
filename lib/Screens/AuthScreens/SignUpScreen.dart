@@ -1,4 +1,5 @@
 import 'package:classroom/Providers/auth_provider.dart';
+import 'package:classroom/Services/logout_login_services.dart';
 import 'package:classroom/Utils/Components/my_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -127,6 +128,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         isLoading: providerValue.isLoading,
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+
+
                             providerValue.signup(
                               username: _nameController.text.trim(),
                               phone: _phoneController.text.trim(),
@@ -134,6 +137,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               password: _passwordController.text.trim(),
                               context: context,
                             );
+
+                            LogoutLoginServices().loginRefreshData(context);
                           }
                         },
                         horizontalPadding: 50,
