@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 
 class TaskDetailsScreen extends StatefulWidget {
   final String taskId;
@@ -39,7 +40,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     }
   }
 
-  void _gradeSubmission(BuildContext context, QueryDocumentSnapshot submission) {
+  void _gradeSubmission(BuildContext context, QueryDocumentSnapshot submission, String userName) {
     final _marksController = TextEditingController(
       text: submission["marksObtained"]?.toString() ?? "",
     );
@@ -47,61 +48,275 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       text: submission["feedback"] ?? "",
     );
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Grade Submission"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _marksController,
-                decoration: const InputDecoration(
-                  labelText: "Marks",
-                  hintText: "Enter marks obtained",
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _feedbackController,
-                decoration: const InputDecoration(
-                  labelText: "Feedback",
-                  hintText: "Optional feedback",
-                ),
-                maxLines: 3,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.deepPurple.withOpacity(0.5),
+                blurRadius: 20,
+                spreadRadius: 5,
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_marksController.text.isEmpty) return;
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Draggable Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 4),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
 
-                try {
-                  await submission.reference.update({
-                    "marksObtained": int.parse(_marksController.text),
-                    "feedback": _feedbackController.text,
-                    "isGraded": true,
-                  });
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Submission graded!")),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Error: $e")),
-                  );
-                }
-              },
-              child: const Text("Submit Grade"),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Grade Submission",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple[300],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.grey[400]),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Student Card
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple[800],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            userName.substring(0, 1).toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              color: Colors.deepPurple[100],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Student",
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              userName,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Marks Input
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: _marksController,
+                    decoration: InputDecoration(
+                      labelText: "Enter Marks",
+                      labelStyle: GoogleFonts.poppins(color: Colors.grey[400]),
+                      hintText: "0-100",
+                      hintStyle: GoogleFonts.poppins(color: Colors.grey[500]),
+                      prefixIcon: Container(
+                        margin: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple[900],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.grade, color: Colors.deepPurple[300]),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Feedback Input
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: _feedbackController,
+                    decoration: InputDecoration(
+                      labelText: "Feedback",
+                      labelStyle: GoogleFonts.poppins(color: Colors.grey[400]),
+                      hintText: "Write your feedback here...",
+                      hintStyle: GoogleFonts.poppins(color: Colors.grey[500]),
+                      prefixIcon: Container(
+                        margin: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.amber[900],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.feedback, color: Colors.amber[300]),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 12),
+                    ),
+                    maxLines: 3,
+                    style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Submit Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (_marksController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text("Please enter marks"),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              backgroundColor: Colors.amber[800],
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          await submission.reference.update({
+                            "marksObtained": int.parse(_marksController.text),
+                            "feedback": _feedbackController.text,
+                            "isGraded": true,
+                            "gradedAt": FieldValue.serverTimestamp(),
+                          });
+
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.white),
+                                  const SizedBox(width: 8),
+                                  const Text("Submission graded successfully!"),
+                                ],
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              backgroundColor: Colors.green[800],
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(Icons.error_outline, color: Colors.white),
+                                  const SizedBox(width: 8),
+                                  Text("Error: ${e.toString()}"),
+                                ],
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.deepPurple[800],
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple[700],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        "Submit Grade",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -275,7 +490,7 @@ class _ModeratorView extends StatelessWidget {
   final String taskId;
   final String classroomId;
   final int totalMarks;
-  final Function(BuildContext, QueryDocumentSnapshot) onGrade;
+  final Function(BuildContext, QueryDocumentSnapshot,String) onGrade;
 
   const _ModeratorView({
     required this.taskId,
@@ -389,10 +604,7 @@ class _ModeratorView extends StatelessWidget {
                               contentPadding: EdgeInsets.zero,
                               leading: CircleAvatar(
                                 backgroundColor: Colors.deepPurple.shade100,
-                                child: Text(
-                                  userSnapshot.data!["username"][0],
-                                  style: TextStyle(color: Colors.deepPurple),
-                                ),
+                                child: _buildAvatar(userSnapshot.data!),
                               ),
                               title: Text(
                                 userSnapshot.data!["username"],
@@ -404,7 +616,7 @@ class _ModeratorView extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    submission["fileUrl"].split('/').last,
+                                    submission["fileName"],
                                     style: TextStyle(color: Colors.grey),
                                   ),
                                   SizedBox(height: 4),
@@ -417,31 +629,38 @@ class _ModeratorView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
+
+
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.remove_red_eye, color: Colors.teal),
+                                  onPressed: () => _previewFile(context, submission["fileUrl"]),
+                                  tooltip: 'Preview submission',
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.download, color: Colors.deepPurple),
+                                  onPressed: () => _downloadFile(context, submission["fileUrl"]),
+                                  tooltip: 'Download submission',
+                                ),
+                                if (submission["isGraded"])
                                   IconButton(
-                                    icon: Icon(Icons.download, color: Colors.deepPurple),
-                                    onPressed: () => _downloadFile(context, submission["fileUrl"]),
-                                    tooltip: 'Download submission',
-                                  ),
-                                  if (submission["isGraded"])
-                                    IconButton(
-                                      icon: Icon(Icons.edit, color: Colors.blue),
-                                      onPressed: () => onGrade(context, submission),
-                                      tooltip: 'Edit grade',
-                                    )
-                                  else
-                                    ElevatedButton(
-                                      onPressed: () => onGrade(context, submission),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.deepPurple,
-                                        padding: EdgeInsets.symmetric(horizontal: 12),
-                                      ),
-                                      child: Text("Grade"),
+                                    icon: Icon(Icons.edit, color: Colors.blue),
+                                    onPressed: () => onGrade(context, submission,userSnapshot.data!["username"]),
+                                    tooltip: 'Edit grade',
+                                  )
+                                else
+                                  ElevatedButton(
+                                    onPressed: () => onGrade(context, submission,userSnapshot.data!["username"]),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.deepPurple,
+                                      padding: EdgeInsets.symmetric(horizontal: 15),
                                     ),
-                                ],
-                              ),
+                                    child: Text("Grade"),
+                                  ),
+                              ],
                             ),
                             if (submission["isGraded"]) ...[
                               Divider(),
@@ -495,6 +714,61 @@ class _ModeratorView extends StatelessWidget {
     if (percentage >= 0.5) return Colors.orange;
     return Colors.red;
   }
+
+  Widget _buildAvatar(DocumentSnapshot user) {
+    final profileImage = user['profileImageURL'];
+    if (profileImage != null && profileImage.isNotEmpty) {
+      return CircleAvatar(backgroundImage: NetworkImage(profileImage));
+    }
+    return CircleAvatar(
+      backgroundColor: Colors.blueAccent,
+      child: Text(
+        (user['username']?.isNotEmpty ?? false)
+            ? user['username'][0].toUpperCase()
+            : '?',
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Future<void> _previewFile(BuildContext context, String url) async {
+    try {
+      final previewUrl = _getPreviewUrl(url);
+      if (await canLaunchUrl(Uri.parse(previewUrl))) {
+        await launchUrl(
+          Uri.parse(previewUrl),
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        throw 'Could not launch preview';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// For docs, pdfs, pptx, etc.
+  String _getPreviewUrl(String fileUrl) {
+    // Use Google Docs Viewer for non-image files
+    final lower = fileUrl.toLowerCase();
+    if (lower.endsWith('.pdf') ||
+        lower.endsWith('.doc') ||
+        lower.endsWith('.docx') ||
+        lower.endsWith('.ppt') ||
+        lower.endsWith('.pptx') ||
+        lower.endsWith('.xls') ||
+        lower.endsWith('.xlsx')) {
+      return "https://docs.google.com/viewer?url=$fileUrl&embedded=true";
+    }
+    // For images or direct viewable files
+    return fileUrl;
+  }
+
 }
 
 class _StudentView extends StatefulWidget {
@@ -540,6 +814,7 @@ class _StudentViewState extends State<_StudentView> {
           .add({
         "studentId": FirebaseAuth.instance.currentUser!.uid,
         "fileUrl": fileUrl,
+        "fileName":p.basename(_submissionFile!.path),
         "submittedAt": Timestamp.now(),
         "marksObtained":null,
         "feedback":'',
@@ -584,7 +859,7 @@ class _StudentViewState extends State<_StudentView> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(vertical: 16,horizontal: 50),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -602,7 +877,7 @@ class _StudentViewState extends State<_StudentView> {
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.assignment, color: Colors.deepPurple),
                       title: Text("Submitted file"),
-                      subtitle: Text(submission!["fileUrl"].split('/').last),
+                      subtitle: Text(submission!["fileName"]),
                       trailing: IconButton(
                         icon: Icon(Icons.download, color: Colors.deepPurple),
                         onPressed: () => launchUrl(Uri.parse(submission["fileUrl"])),
