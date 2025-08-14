@@ -248,16 +248,16 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
                   },
 
                 ),
-              if(!_isModerator)
+              if (!_isModerator)
                 ListTile(
-                    leading: Icon(Icons.logout, color: Colors.redAccent),
-                    title: Text("Leave Classroom"),
-                    onTap: () async {
-                      Navigator.pop(context);
+                  leading: Icon(Icons.logout, color: Colors.redAccent),
+                  title: Text("Leave Classroom"),
+                  onTap: () async {
+                    try {
+                      final confirmed =
+                          await _confirmDelete(context, isDelete: false);
 
-                      final confirmed = await _confirmDelete(context,isDelete: false);
                       if (confirmed == true) {
-
                         await FirebaseFirestore.instance
                             .collection("Classrooms")
                             .doc(widget.classroomId)
@@ -265,25 +265,20 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
                           "members": FieldValue.arrayRemove([user.uid]),
                         });
 
-
-
-
-                         Navigator.pop(context);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Successfully removed your class")),
-                        );
+                        if (mounted) {
+                          Navigator.pop(context);// close sheet
+                          Navigator.pop(context);//go back to home
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Successfully left the class")),
+                          );
+                        }
                       }
-
-
-                      try {
-                      } catch (e) {
-                        Navigator.pop(context);
-                        debugPrint("Leaving failed: $e");
-                      }
+                    } catch (e) {
+                      debugPrint("Leaving failed: $e");
                     }
-                ),
-
+                  },
+                )
             ],
           ),
         );

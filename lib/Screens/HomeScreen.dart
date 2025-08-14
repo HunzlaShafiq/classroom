@@ -301,6 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Joined successfully!")),
+      );
+
       final classroom = query.docs.first;
       await FirebaseFirestore.instance
           .collection("Classrooms")
@@ -317,18 +322,19 @@ class _HomeScreenState extends State<HomeScreen> {
         "joinedClassrooms": FieldValue.arrayUnion([classroom.id]),
       });
 
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Joined successfully!")),
-      );
 
-      final classData= await FirebaseFirestore.instance
+
+      final docSnapshot = await FirebaseFirestore.instance
           .collection("Classrooms")
-          .doc(classroom.id).get();
-      Classroom classroomDetails=  Classroom.fromFirestore(classData.data() as DocumentSnapshot<Object?>);
+          .doc(classroom.id)
+          .get();
+
+      Classroom classroomDetails = Classroom.fromFirestore(docSnapshot);
 
 
-    Navigator.push(
+
+
+      Navigator.push(
         context,
         CustomPageTransitions.rightToLeft(
           ClassroomDetailsScreen(
