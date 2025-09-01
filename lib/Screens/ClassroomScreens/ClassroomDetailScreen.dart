@@ -48,9 +48,11 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
         .collection("Classrooms")
         .doc(widget.classroomId)
         .get();
-    setState(() {
+    if(mounted) {
+      setState(() {
       _isModerator = classroom["createdBy"] == FirebaseAuth.instance.currentUser!.uid;
     });
+    }
   }
 
   @override

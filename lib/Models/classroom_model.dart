@@ -39,7 +39,7 @@ class Classroom {
   // To Firestore Map
   Map<String, dynamic> toMap() {
     return {
-      'classroomId': classroomID,
+      'classroomID': classroomID,
       'className': className,
       'classDescription': classDescription,
       'classImageUrl': classImageUrl,
