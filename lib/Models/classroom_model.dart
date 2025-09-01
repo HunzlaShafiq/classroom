@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Classroom {
-  final String classroomId;
+  final String classroomID;
   final String className;
   final String classDescription;
   final String classImageUrl;
@@ -11,7 +11,7 @@ class Classroom {
   final List<String> members;
 
   Classroom({
-    required this.classroomId,
+    required this.classroomID,
     required this.className,
     required this.classDescription,
     required this.classImageUrl,
@@ -25,7 +25,7 @@ class Classroom {
   factory Classroom.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Classroom(
-      classroomId: data['classroomId'] ?? '',
+      classroomID: data['classroomID'] ?? '',
       className: data['className'] ?? '',
       classDescription: data['classDescription'] ?? '',
       classImageUrl: data['classImageUrl'] ?? '',
@@ -39,7 +39,7 @@ class Classroom {
   // To Firestore Map
   Map<String, dynamic> toMap() {
     return {
-      'classroomId': classroomId,
+      'classroomId': classroomID,
       'className': className,
       'classDescription': classDescription,
       'classImageUrl': classImageUrl,

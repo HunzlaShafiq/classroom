@@ -37,7 +37,7 @@ class ClassroomCard extends StatelessWidget {
             CustomPageTransitions.rightToLeft(
               ClassroomDetailsScreen(
                 className: classroom.className,
-                classroomId: classroom.classroomId,
+                classroomId: classroom.classroomID,
                 joinCode: classroom.joinCode,
                 classDescription: classroom.classDescription,
                 classImageURL: classroom.classImageUrl,

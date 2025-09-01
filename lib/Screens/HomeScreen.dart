@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final classroom = provider.classrooms[index];
               return ClassroomCard(
                 classroom: classroom,
-                classroomId: classroom.classroomId,
+                classroomId: classroom.classroomID,
               );
             },
           );
@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
         CustomPageTransitions.rightToLeft(
           ClassroomDetailsScreen(
             className:  classroomDetails.className,
-            classroomId: classroomDetails.classroomId,
+            classroomId: classroomDetails.classroomID,
             joinCode: classroomDetails.joinCode,
             classDescription: classroomDetails.classDescription,
             classImageURL: classroomDetails.classImageUrl,
