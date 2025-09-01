@@ -88,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
+                LogoutLoginServices().logoutRemoveData(context);
               },
             ),
           ],
@@ -453,7 +454,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     _confirmLogout(context);
-                    LogoutLoginServices().logoutRemoveData(context);
                   },
                 ),
               ),

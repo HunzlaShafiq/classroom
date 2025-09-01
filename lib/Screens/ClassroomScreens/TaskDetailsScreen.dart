@@ -734,10 +734,13 @@ class _ModeratorView extends StatelessWidget {
   Future<void> _previewFile(BuildContext context, String url) async {
     try {
       final previewUrl = _getPreviewUrl(url);
-      if (await canLaunchUrl(Uri.parse(previewUrl))) {
+
+      final uri = Uri.parse(previewUrl);
+
+      if (await canLaunchUrl(uri)) {
         await launchUrl(
-          Uri.parse(previewUrl),
-          mode: LaunchMode.externalApplication,
+          uri,
+          mode: LaunchMode.externalApplication, // open in browser
         );
       } else {
         throw 'Could not launch preview';
@@ -752,10 +755,11 @@ class _ModeratorView extends StatelessWidget {
     }
   }
 
-  /// For docs, pdfs, pptx, etc.
+  /// Generates preview URL for supported file types
   String _getPreviewUrl(String fileUrl) {
-    // Use Google Docs Viewer for non-image files
     final lower = fileUrl.toLowerCase();
+
+    // Supported formats via Google Docs Viewer
     if (lower.endsWith('.pdf') ||
         lower.endsWith('.doc') ||
         lower.endsWith('.docx') ||
@@ -763,9 +767,10 @@ class _ModeratorView extends StatelessWidget {
         lower.endsWith('.pptx') ||
         lower.endsWith('.xls') ||
         lower.endsWith('.xlsx')) {
-      return "https://docs.google.com/viewer?url=$fileUrl&embedded=true";
+      return "https://docs.google.com/viewer?embedded=true&url=$fileUrl";
     }
-    // For images or direct viewable files
+
+    // For images and other direct viewable files
     return fileUrl;
   }
 
