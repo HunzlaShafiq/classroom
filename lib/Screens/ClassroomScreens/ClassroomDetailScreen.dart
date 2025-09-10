@@ -81,6 +81,7 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
           leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios_new,color: Colors.white,)),
           bottom: TabBar(
             controller: _tabController,
+            indicatorColor: Colors.deepPurpleAccent,
             tabs: const [
               Tab(icon: Icon(Icons.assignment)),
               Tab(icon: Icon(Icons.people)),
@@ -766,6 +767,7 @@ class MembersTab extends StatelessWidget {
               )
             else
               ...provider.students.map((user) => ListTile(
+                onTap: ()=>_studentBottomSheet(user,context),
                 leading: _buildAvatar(user),
                 title: Text(user['username'] ?? "Unnamed"),
                 subtitle: Text(user['email'] ?? ""),
@@ -790,6 +792,51 @@ class MembersTab extends StatelessWidget {
         style: const TextStyle(color: Colors.white),
       ),
     );
+  }
+
+  void _studentBottomSheet(Map<String, dynamic> user,BuildContext context) {
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                user['username']
+              ),
+              SizedBox(height: 50,),
+              ListTile(
+                leading: Icon(Icons.exit_to_app,color: Colors.redAccent,),
+                title: Text('Remove'),
+                onTap: () async{
+                  await FirebaseFirestore.instance
+                      .collection("Classrooms")
+                      .doc(classroom.id)
+                      .update({
+                    "members": FieldValue.arrayUnion([user.uid]),
+                  });
+
+                  // Update user's joinedClassrooms list
+                  await FirebaseFirestore.instance
+                      .collection("Users3")
+                      .doc(user.uid)
+                      .update({
+                    "joinedClassrooms": FieldValue.arrayUnion([classroom.id]),
+                  });
+                },
+              )
+            ],
+          ),
+        );
+      },
+    );
+
   }
 }
 

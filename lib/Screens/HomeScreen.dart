@@ -11,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
 import '../Providers/classroom_provider.dart';
 import '../Services/logout_login_services.dart';
 import '../Utils/Components/classroom_card.dart';
@@ -302,10 +301,13 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      if(mounted) {
+
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Joined successfully!")),
       );
+      }
 
       final classroom = query.docs.first;
       await FirebaseFirestore.instance
