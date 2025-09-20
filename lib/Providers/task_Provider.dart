@@ -30,7 +30,7 @@ class TaskProvider with ChangeNotifier {
   Future<void> fetchClassDetails() async{
     Future.wait([
       _listenToTasks(),
-      _fetchMembers()
+      fetchMembers()
     ]);
   }
 
@@ -54,7 +54,7 @@ class TaskProvider with ChangeNotifier {
 
 
 
-  Future<void> _fetchMembers() async {
+  Future<void> fetchMembers() async {
     FirebaseFirestore.instance
         .collection("Classrooms")
         .doc(classroomId)
