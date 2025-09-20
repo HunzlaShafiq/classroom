@@ -96,6 +96,7 @@ class _ClassroomDetailsScreenState extends State<ClassroomDetailsScreen>
             MembersTab(classroomCode: widget.joinCode,
               className: widget.className,profileImageUrl: widget.classImageURL,
               classDescription: widget.classDescription,
+              classID: widget.classroomId
             ),
 
 
@@ -628,10 +629,11 @@ class MembersTab extends StatelessWidget {
   final String className;
   final String profileImageUrl;
   final String classDescription;
+  final String classID;
 
   const MembersTab({
     super.key,
-    required this.classroomCode, required this.className, required this.profileImageUrl, required this.classDescription,
+    required this.classroomCode, required this.className, required this.profileImageUrl, required this.classDescription, required this.classID,
   });
 
   @override
@@ -767,7 +769,9 @@ class MembersTab extends StatelessWidget {
               )
             else
               ...provider.students.map((user) => ListTile(
-                onTap: ()=>_studentBottomSheet(user,context),
+                onTap: () {
+                  _studentBottomSheet(user, context,provider.fetchMembers);
+                  },
                 leading: _buildAvatar(user),
                 title: Text(user['username'] ?? "Unnamed"),
                 subtitle: Text(user['email'] ?? ""),
@@ -794,7 +798,7 @@ class MembersTab extends StatelessWidget {
     );
   }
 
-  void _studentBottomSheet(Map<String, dynamic> user,BuildContext context) {
+  void _studentBottomSheet(Map<String, dynamic> user,BuildContext context,VoidCallback refreshStudents) {
 
     showModalBottomSheet(
       context: context,
@@ -807,9 +811,63 @@ class MembersTab extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                user['username']
+              //student card
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple[800],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          user['username'].substring(0, 1).toUpperCase(),
+                          style: GoogleFonts.poppins(
+                            color: Colors.deepPurple[100],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Student",
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            user['username'],
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
+              const SizedBox(height: 16),
               SizedBox(height: 50,),
               ListTile(
                 leading: Icon(Icons.exit_to_app,color: Colors.redAccent,),
@@ -817,18 +875,22 @@ class MembersTab extends StatelessWidget {
                 onTap: () async{
                   await FirebaseFirestore.instance
                       .collection("Classrooms")
-                      .doc(classroom.id)
+                      .doc(classID)
                       .update({
-                    "members": FieldValue.arrayUnion([user.uid]),
+                    "members": FieldValue.arrayUnion([user['userID']]),
                   });
 
                   // Update user's joinedClassrooms list
                   await FirebaseFirestore.instance
                       .collection("Users3")
-                      .doc(user.uid)
+                      .doc(user['userID'])
                       .update({
-                    "joinedClassrooms": FieldValue.arrayUnion([classroom.id]),
+                    "joinedClassrooms": FieldValue.arrayUnion([classID]),
                   });
+                  refreshStudents();
+                  Navigator.pop(context);
+
+
                 },
               )
             ],
