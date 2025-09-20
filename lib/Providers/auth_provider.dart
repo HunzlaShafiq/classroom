@@ -58,9 +58,11 @@ class AuthProviders extends ChangeNotifier {
         email: email,
         password: password,
       );
+      final userID=cred.user!.uid;
 
-      await FirebaseFirestore.instance.collection("Users3").doc(cred.user!.uid).set({
+      await FirebaseFirestore.instance.collection("Users3").doc(userID).set({
         "username": username,
+        'userID':userID,
         "phone": phone,
         "email": email,
         'profileImageURL':'',
