@@ -15,7 +15,7 @@ class LogoutLoginServices{
   void loginRefreshData(context){
 
     Provider.of<ClassroomProvider>(context,listen: false).refreshDataOnLogin();
-    Provider.of<ProfileProvider>(context,listen: false).removeDataOnLogout();
+    Provider.of<ProfileProvider>(context,listen: false).refreshDataOnLogin();
 
   }
 
