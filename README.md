@@ -1,7 +1,7 @@
 # 🎓 EduNest - Classroom Management App
 
 <div align="center">
-  <img src="https://github.com/HunzlaShafiq/classroom/assets/classroomLogo.png?raw=true" width="200" alt="EduNest Logo">
+  <img src="https://github.com/HunzlaShafiq/classroom/assets/classroomLogo.png" width="200" alt="EduNest Logo">
   <p>A Flutter-based classroom management system inspired by Google Classroom</p>
   
   [![Flutter](https://img.shields.io/badge/Flutter-%2302569B?logo=flutter)](https://flutter.dev)
@@ -75,4 +75,3 @@ Cloud Firestore (NoSQL Database)
 
 Firebase Storage (File Uploads)
 
-Firebase Cloud Messaging (Notifications)
